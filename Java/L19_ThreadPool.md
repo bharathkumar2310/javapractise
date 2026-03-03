@@ -257,7 +257,18 @@ Behavior:
     
     👉 Running tasks may STILL continue if they ignore interruption.
 
-Both shutdown and stop lads to ternated state
+Both shutdown and stop leads to terminated state
+
+![img.png](../Images/shutD1.png)
+
+![img.png](../Images/shutD2.png)
+
+![img.png](../Images/shutD3.png)
+
+![img.png](../Images/shutD4.png)
+
+![img.png](../Images/ShutD5.png)
+
 
 ```java
 import java.util.concurrent.*;
@@ -517,3 +528,78 @@ Resources include:
         Thread pools
 
 These are NOT managed by GC automatically.
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+**_SCHEDULED THREAD POOL EXECUTOR :_**
+
+      ScheduledThreadPoolExecutor is a concrete class in java.util.concurrent used to schedule tasks to run after a delay or periodically.
+      It is the implementation behind:
+         
+         Executors.newScheduledThreadPool(int corePoolSize)
+         Executors.newSingleThreadScheduledExecutor()
+
+
+It extends ThreadPoolExecutor and implements ScheduledExecutorService.
+
+
+CONSTRUCTORS : 
+
+      ScheduledThreadPoolExecutor(int corePoolSize)
+      ScheduledThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory)
+      ScheduledThreadPoolExecutor(int corePoolSize, RejectedExecutionHandler handler)
+      ScheduledThreadPoolExecutor(int corePoolSize, ThreadFactory threadFactory, RejectedExecutionHandler handler) 
+
+METHODS : 
+
+      schedule(Runnable command, long delay, TimeUnit unit)
+      schedule(Callable<V> callable, long delay, TimeUnit unit)
+      scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit)
+      scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit)
+
+
+ScheduleAtFixedRate:
+
+      Schedules a task to run repeatedly at a fixed interval.
+      The next execution starts at a fixed period after the previous execution started, regardless of how long the task takes to run.
+
+Example :
+
+      Period = 3 seconds
+      Task execution time = 10 seconds
+      Using scheduleAtFixedRate
+
+        Task starts at 0s → runs for 10s → next starts at 3s (overlaps) → runs for 10s → next starts at 6s (overlaps) → runs for 10s
+         0s   → Task starts
+         10s  → Task finishes
+         10s  → Next execution starts immediately
+         20s  → Task finishes
+         20s  → Next execution starts immediately
+         30s  → Task finishes
+
+
+ScheduleWithFixedDelay:
+
+        Schedules a task to run repeatedly with a fixed delay between the end of one execution and the start of the next.
+        The next execution starts after a fixed delay from the completion of the previous execution, so it accounts for the task’s execution time.
+
+
+Example :
+         Period = 3 seconds
+         Task execution time = 10 seconds    
+   
+      Tasks start at 0s → runs for 10s → next starts at 13s (3s after previous finishes) → runs for 10s → next starts at 23s (3s after previous finishes) → runs for 10s
+              0s   → Task starts
+              10s  → Task finishes  
+              13s  → Next execution starts
+              23s  → Task finishes
+              26s  → Next execution starts   
+
+
+![img.png](../Images/STP1.png)
+
+![img.png](../Images/STP2.png)
+
+![img.png](../Images/STP3.png)
