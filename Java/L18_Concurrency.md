@@ -37,7 +37,12 @@ Concurrency Control
 
 
 
+🔐 What is a Mutex in Java?
 
+    A Mutex (short for Mutual Exclusion) is a synchronization mechanism(concept) that ensures only one thread can access a critical section of code at a time.
+    Synchronized keyword, reentrant locks and semaphores with one thread helps in acheiving mutex
+
+   
 
 **_MONITOR LOCKS :_**
 

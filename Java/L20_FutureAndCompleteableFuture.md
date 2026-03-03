@@ -270,9 +270,9 @@ ForJoin Pool uses daemon threads by default
 We can provide custome executors too
 
 
-![img.png](img.png)
+![img.png](../Images/CF1.png)
 
-![img_1.png](img_1.png)
+![img_1.png](../Images/CF2.png)
 
 
 
@@ -291,11 +291,11 @@ CompletableFuture that:
 ----> Returns a new COmpetable Future Obj
 
 
-![img_2.png](img_2.png)
+![img_2.png](../Images/CF3.png)
 
-![img_3.png](img_3.png)
+![img_3.png](../Images/CF4.png)
 
-![img_4.png](img_4.png)
+![img_4.png](../Images/CF5.png)
 
 
 ```java
@@ -329,10 +329,87 @@ thenApplyAsync() : Similar to thenApply() but not hte same thread will execute t
 
 
 
-1️⃣ What is thenCompose?
+1️⃣ What is thenCompose and thenCompose Async?
 
 thenCompose is used when your continuation itself returns a CompletableFuture.
 It flattens nested futures into a single CompletableFuture
 Avoids having a CompletableFuture<CompletableFuture<T>>
 
 Helps chain dependent async tasks sequentially
+
+![img_5.png](../Images/CF6.png)
+
+
+
+1️⃣ What is thenAccept?
+
+      thenAccept is a completion stage method that:
+      Runs after a previous CompletableFuture completes normally
+      Takes a Consumer<T> → consumes the result of the previous stage without producing a new result
+      Returns a CompletableFuture<Void>
+      Usually used for side effects like printing, logging, saving to DB, etc.
+
+```java
+import java.util.concurrent.*;
+
+public class ThenAcceptExample {
+   public static void main(String[] args) {
+      CompletableFuture<Integer> fut = CompletableFuture.supplyAsync(() -> {
+         System.out.println("Supply Thread: " + Thread.currentThread().getName());
+         return 42;
+      });
+
+      fut.thenAccept(val -> {
+         System.out.println("thenAccept Thread: " + Thread.currentThread().getName());
+         System.out.println("Result: " + val);
+      });
+
+      // Wait for async tasks to finish
+      fut.join();
+   }
+}
+
+
+```
+![img.png](../Images/CF7.png)
+
+1️⃣ What is thenCombine?
+
+      thenCombine is used to combine results of two independent CompletableFutures when both complete normally
+      It takes a BiFunction<T, U, V> → combines the two results into one new value
+      Returns a new CompletableFuture<V> containing the combined result
+
+
+```java
+
+import java.util.concurrent.*;
+
+public class ThenCombineExample {
+    public static void main(String[] args) {
+        CompletableFuture<Integer> fut1 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("fut1 Thread: " + Thread.currentThread().getName());
+            return 10;
+        });
+
+        CompletableFuture<Integer> fut2 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("fut2 Thread: " + Thread.currentThread().getName());
+            return 20;
+        });
+
+        CompletableFuture<Integer> combined = fut1.thenCombine(fut2, (x, y) -> {
+            System.out.println("thenCombine Thread: " + Thread.currentThread().getName());
+            return x + y;
+        });
+
+        combined.thenAccept(sum -> System.out.println("Sum: " + sum));
+
+        // Wait for completion
+        combined.join();
+    }
+}
+
+
+
+```
+
+![img_1.png](../Images/CF8.png)
