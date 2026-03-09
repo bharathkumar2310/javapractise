@@ -125,8 +125,7 @@ JVM internally does:
 
     population = 100
 
-This value is stored inside:  Class<Person> object
-Not in metaspace.
+This value is stored inside:  Class<Person> object but the value is refernced in metaspace  which in turn references heap if object  
 
 🔥 STEP 4 — Creating an Instance
 
