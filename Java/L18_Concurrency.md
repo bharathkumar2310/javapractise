@@ -131,7 +131,8 @@ count++;
 ```
 
 
-More efficient than synchronizing whole method.
+More efficient than synchronizing w
+hole method.
 
 Lock can be any object.
 
@@ -891,3 +892,69 @@ This means:
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Problem	            What Happens	                                     Example
+Race Condition	     Multiple threads modify shared data	             count++
+Data Inconsistency	 Shared state becomes incorrect	                      Bank transfer
+Deadlock	         Threads wait for each other's locks forever	       lockA + lockB
+Livelock	          Threads keep reacting but no progress	             polite threads
+Starvation	            Thread never gets CPU/lock	                      greedy thread
+Visibility Issue	      Thread cannot see updated value	           cached variable
+
+
+
+
+Livelock examples
+
+
+```java
+
+class Worker {
+
+    private boolean active = true;
+
+    public void work(Worker other) {
+
+        while(active) {
+
+            if(other.active) {
+                System.out.println(Thread.currentThread().getName() +
+                        " : giving chance to other worker");
+                continue;
+            }
+
+            System.out.println(Thread.currentThread().getName() + " working");
+
+            active = false;
+        }
+    }
+}
+
+public class LivelockExample {
+
+    public static void main(String[] args) {
+
+        Worker w1 = new Worker();
+        Worker w2 = new Worker();
+
+        Thread t1 = new Thread(() -> w1.work(w2), "Thread1");
+        Thread t2 = new Thread(() -> w2.work(w1), "Thread2");
+
+        t1.start();
+        t2.start();
+    }
+}
+
+```
+
+
+⚡ Summary Table
+Problem	                        Main Solution
+Race Condition	           synchronized / Atomic / Lock
+Deadlock	               Lock ordering / tryLock
+Livelock	               Random backoff
+Starvation	               Fair locks / thread pools
+Data Inconsistency	       Atomic operations / transactions
+Visibility	               volatile / synchronized

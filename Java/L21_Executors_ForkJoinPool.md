@@ -74,3 +74,296 @@ public class SynchronousQueueExample {
 
 ![img_3.png](../Images/Executors4.png)
 
+
+
+
+**_FORKJOINPOOL EXECUTOR:_**
+
+
+🔹 What is ForkJoinPool?
+
+ForkJoinPool is a special thread pool introduced in Java Platform, Standard Edition 7 as part of the java.util.concurrent package.
+It is designed for:
+
+        🚀 Parallelizing tasks that can be split into smaller independent subtasks and then combined.
+        It follows the Fork–Join framework and is based on the Divide and Conquer algorithm.
+
+
+For Example Say we have a task to add 100 nos
+
+In normal threadpool executor this is a single task and only one threa adds from 1 to 100
+In fork Join pool this adding is divided into multiple subtasks like add 1 to 10 one thread 2 to 20 another thread and son on
+say if u have multiple processors the tim taken will be much faster
+
+
+🔹 How it Works Internally
+1️⃣ Work-Stealing Algorithm (Very Important)
+
+Each thread has its own deque (double-ended queue).
+A thread pushes and pops tasks from its own queue.
+If a thread becomes idle:
+
+    It steals work from another thread’s queue.
+
+👉 This improves CPU utilization and reduces contention.
+
+🔹 Why Do We Need ForkJoinPool?
+
+Normal thread pools (like ExecutorService) are good for:
+
+    Independent tasks
+
+But ForkJoinPool is better for:
+
+    Recursive tasks
+    CPU-intensive parallel computation
+    Large data processing
+
+Because:
+
+    It minimizes idle threads
+    It reduces locking
+    It scales efficiently with CPU cores
+
+
+1️⃣ Efficient CPU Utilization (Work-Stealing)
+
+Each worker thread has its own queue.
+
+    If a thread finishes early:
+    It steals tasks from another thread.
+
+This means:
+
+        ✅ Less idle time
+        ✅ Better load balancing
+        ✅ High CPU utilization
+
+This is the biggest advantage.
+
+
+It is used in stream for parallel processing
+
+![img.png](../Images/fjp1.png)
+
+![img_1.png](../Images/fjp2.png)
+
+![img_2.png](../Images/fjp3.png)
+
+![img_3.png](../Images/fjp4.png)
+
+```java
+import java.util.concurrent.*;
+
+class SumTask extends RecursiveTask<Long> {
+
+    private static final int THRESHOLD = 10_000;
+
+    private final int[] arr;
+    private final int start;
+    private final int end;
+
+    public SumTask(int[] arr, int start, int end) {
+        this.arr = arr;
+        this.start = start;
+        this.end = end;
+    }
+
+    @Override
+    protected Long compute() {
+
+        // Base case: small enough → compute directly
+        if (end - start <= THRESHOLD) {
+            long sum = 0;
+            for (int i = start; i < end; i++) {
+                sum += arr[i];
+            }
+            return sum;
+        }
+
+        // Split into two subtasks
+        int mid = (start + end) / 2;
+
+        SumTask left = new SumTask(arr, start, mid);
+        SumTask right = new SumTask(arr, mid, end);
+
+        // Fork left task (submit asynchronously)
+        left.fork();
+
+        // Compute right task directly
+        long rightResult = right.compute();
+
+        // Wait for left task result
+        long leftResult = left.join();
+
+        return leftResult + rightResult;
+    }
+}
+```
+
+```java
+
+public class Main {
+    public static void main(String[] args) {
+
+        int[] arr = new int[1_000_000];
+        Arrays.fill(arr, 1);
+
+        ForkJoinPool pool = new ForkJoinPool();
+
+        SumTask task = new SumTask(arr, 0, arr.length);
+
+        long result = pool.invoke(task);
+
+        System.out.println("Sum: " + result);
+    }
+}
+```
+
+
+ForkJoinPool pool = new ForkJoinPool();
+
+        This: Creates worker threads (≈ number of CPU cores)
+        Each worker has its own deque (double-ended queue)
+        Uses work-stealing algorithm
+        It manages execution.
+
+🧩 Component 2: RecursiveTask
+class SumTask extends RecursiveTask<Long>
+
+Two main types:
+
+        RecursiveTask<V> → returns result
+        RecursiveAction → no result
+
+It defines:
+
+        protected Long compute()
+        This is where splitting logic lives.
+
+🧩 Component 3: compute()
+
+This method decides:
+
+        Should I solve directly?
+        Or split into smaller subtasks?
+        This is the divide-and-conquer logic.
+
+🧩 Component 4: fork()
+left.fork();
+
+What it does:
+
+        Pushes task into worker’s deque
+        Allows another worker to steal it
+        Returns immediately (non-blocking)
+        Think: "Schedule this subtask to run in parallel"
+
+🧩 Component 5: compute() (on right side)
+long rightResult = right.compute();
+
+Important pattern: We fork one task, compute the other.
+
+Why?
+
+        Because: Current thread stays busy
+        Avoids unnecessary task overhead
+        This is optimal ForkJoin pattern.
+
+🧩 Component 6: join()
+long leftResult = left.join();
+
+            This: Waits for left task to finish
+            If not finished, worker may help execute it
+            Returns its result
+            Join = combine phase.
+
+🔥 Complete Execution Flow
+
+Assume:
+
+        4 CPU cores
+        1,000,000 elements
+        
+        Step 1: Root Task
+        Sum(0..1000000)
+        Too large → split
+        
+        Step 2: First Split
+        Left:  0..500000
+        Right: 500000..1000000
+        
+        Left → forked
+        Right → computed immediately
+        
+        Step 3: More Splits
+
+Right also too large → split again:
+
+            500k..750k
+            750k..1000k
+
+This continues until chunk size ≤ THRESHOLD.
+
+Step 4: Work Stealing
+
+Suppose:
+
+        Thread-1 owns left task.
+        Thread-2 becomes idle.
+        Thread-2 steals from Thread-1’s deque.
+        This balances load.
+
+Step 5: Join Phase
+
+After base tasks compute sums:
+
+        Combine small results
+        Combine bigger results
+        Combine root result
+
+Final result returned to invoke().
+
+        🔥 Internal Structure (Simplified Tree)
+        0..1000000
+        /              \
+        0..500k           500k..1000k
+        /     \             /       \
+        ...       ...         ...       ...
+
+This is a task tree.
+
+        Fork = branch
+        Join = combine
+
+🔥 Why Fork One and Compute One?
+
+Instead of:
+
+        left.fork();
+        right.fork();
+        left.join();
+        right.join();
+
+Better:
+
+        left.fork();
+        right.compute();
+        left.join();
+
+Because:
+
+        Avoids creating too many queued tasks
+        Current thread does useful work
+        Reduces scheduling overhead
+
+🔥 Work-Stealing Mechanism
+
+Each worker:
+
+        Has its own deque
+        Pushes new tasks at top
+        Pops from top
+        Other threads steal from bottom
+
+Submission queue is also unbounded deque

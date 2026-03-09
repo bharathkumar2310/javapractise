@@ -328,7 +328,7 @@ Java 9 and above uses G1 GC by default
 🔹 1️⃣ What is PC Register and COunters?
       
       CPU Register: Program Counter (PC) → points to next machine instruction (interpreter or JIT)
-      JVM Counter: bytecodePC → tracks the next bytecode instruction inside the interpreter
+      JVM Counter: bytecodePC → tracks the next bytecode instruction 
 
         PC = Program Counter Register
         It is a small memory area per thread that stores the address of the current bytecode instruction being executed.
@@ -405,7 +405,7 @@ JVM-level	Bytecode PC / Counter	Next bytecode instruction	Thread’s JVM data st
          Interprettor contains machine code to handle data based on our byte code
 
 
-      Your Java bytecode is stored as data, not in the code segment.
+      Your Java bytecode is stored in metadata, not in the code segment.
       
       Only when JIT happens:
       

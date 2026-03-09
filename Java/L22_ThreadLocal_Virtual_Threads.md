@@ -26,6 +26,7 @@ We use ThreadLocal when we need:
         Per-thread context/state accessible throughout the thread without passing as a parameter.
         Avoid synchronization for thread-specific data.
         Maintain consistency in tasks that span multiple methods.
+**_a ThreadLocal object stores only one value per thread, but a thread can have many ThreadLocal variables.**_
 
 Typical Use Cases
 A. User / Request Context (Web apps)

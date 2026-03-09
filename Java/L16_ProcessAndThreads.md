@@ -135,3 +135,91 @@ and JVM will jave some memory in its allocaetd memory for each thread and OS wil
 SO for a thread JVM will allocate seperate memory and OS will allocate seperate memory
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+✅ 1️⃣ Thread creation
+
+    Whenever we create a thread JVM thread obj is created which is linked to native thread created by OS
+
+✔️ Correct (for HotSpot JVM)
+
+        Java uses 1:1 threading model:
+        Java Thread object (heap)
+        ↕
+        Native OS thread
+
+The JVM calls the OS to create a real native thread.
+
+⚠️ 2️⃣ “Each thread will have JVM counters for pointing to next byte code in meta space”
+
+Almost correct, but wording needs fixing.
+Correct version:
+
+Each Java thread has:
+
+        ✅ JVM Program Counter (PC)
+        Points to the next bytecode instruction
+        NOT pointing to Metaspace
+        Points to bytecode inside the method area (Metaspace)
+
+So:
+
+Bytecode is stored in Metaspace
+JVM PC points to the current instruction inside that bytecode
+
+
+
+⚠️ 3️⃣ “JVM registers to store intermediate thread values”
+
+Not exactly correct terminology.
+There are no general “JVM registers” like CPU registers.
+
+Instead, each thread has:
+
+        ✔️ Operand Stack (inside each stack frame)
+        ✔️ Local Variable Array
+        ✔️ Java Stack
+
+These store intermediate values during execution.
+
+So replace: JVM registers
+
+With: Operand stack and local variables inside stack frames
+
+⚠️ 4️⃣ “PC registers which is physical hardware”
+
+This is where things mix.
+
+There are TWO PCs:
+
+🔹 JVM PC (Logical)
+
+        One per Java thread
+        Tracks next bytecode instruction
+        Stored in JVM thread structure
+
+🔹 CPU PC (Hardware register)
+
+        Exists inside CPU core
+        Points to next machine instruction
+        Used when native machine code executes
+
+So:
+
+    ❌ JVM PC is NOT physical hardware
+    ✔️ CPU PC is hardware
+
+⚠️ 5️⃣ “Caches for each thread”
+
+        Not correct.
+        CPU cache (L1/L2/L3):
+        Belongs to CPU core
+        NOT per thread
+Important:
+
+        ✅ L1 cache → private per core
+        ✅ L2 cache → usually private per core
+        ✅ L3 cache → shared across cores
+        Multiple threads may use same cache when scheduled on same core
+
+Threads do NOT have their own hardware caches.

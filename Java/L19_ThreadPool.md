@@ -603,3 +603,207 @@ Example :
 ![img.png](../Images/STP2.png)
 
 ![img.png](../Images/STP3.png)
+
+
+
+🔥 1️⃣ What Is a Delayed Queue?
+
+        A Delayed Queue is a special queue(priority queue) where:
+        An element can only be taken when its delay time has expired.
+
+Until then:
+
+        It stays in the queue
+        Consumers cannot remove it
+
+It is used for:
+
+        Scheduling tasks in the future
+        Time-based execution
+
+
+
+
+🧠 Imagine This Situation
+
+You schedule 3 tasks:
+
+        scheduler.schedule(TaskA, 10, SECONDS);
+        scheduler.schedule(TaskB, 5, SECONDS);
+        scheduler.schedule(TaskC, 20, SECONDS);
+
+Assume current time = 100 seconds.
+
+🔹 Step 1: How Tasks Are Stored
+
+        When you schedule a task, Java calculates:
+        triggerTime = currentTime + delay
+
+So:
+
+        Task	Delay	Trigger Time
+        TaskA	10s  	110
+        TaskB	5s	    105
+        TaskC	20s	    120
+
+Now these are inserted into the DelayedWorkQueue.
+
+🔹 Step 2: How They Are Stored in Queue
+
+This queue is NOT FIFO.
+
+    It is a min-heap (priority queue) ordered by triggerTime.
+
+So internally it looks like:
+
+            TaskB(105)
+           /           \
+    TaskA(110)     TaskC(120)
+
+The smallest trigger time is always at the top.
+
+So the queue order (logical view) is:
+
+        [ TaskB(105), TaskA(110), TaskC(120) ]
+        🔹 Step 3: What Worker Thread Does
+
+Worker thread continuously does:
+
+        Look at top element
+        If triggerTime <= currentTime → execute
+        Else → sleep until triggerTime
+
+
+
+stord in queue
+
+        ScheduledFutureTask {
+            Runnable command;
+            long time;      // next execution time (in nanoseconds)
+            long period;    // interval (positive or negative)
+        }
+
+
+🔵 1️⃣ scheduleAtFixedRate
+scheduler.scheduleAtFixedRate(task, 0, 3, SECONDS);
+
+Inside the queue, it stores:
+
+        command = task
+        time = firstTriggerTime
+        period = +3 seconds (POSITIVE)
+
+👉 Positive period = Fixed Rate
+
+After Each Execution
+
+    It updates:
+
+time = previousScheduledTime + period
+
+Important:
+
+        It does NOT use current time.
+        It uses the original schedule rhythm.
+
+
+🔵 Given
+
+    Period = 3 seconds
+    Task execution time = 5 seconds
+    Using scheduleAtFixedRate
+    Single periodic task
+
+🔥 IMPORTANT RULE (Fixed Rate)
+
+After each execution:
+
+        nextScheduledTime = previousScheduledTime + period
+        NOT based on current time.
+
+🧠 Timeline (Correct Working)
+Initial scheduling
+Initial scheduled time = 0
+Period = 3
+
+Planned schedule times:
+
+0, 3, 6, 9, 12, 15 ...
+✅ 1️⃣ First Execution
+
+Starts at:
+
+0
+
+Runs 5 seconds
+Finishes at:
+
+5
+
+Now executor calculates next time:
+
+0 + 3 = 3
+
+        Is 3 < current time (5)?
+        YES → it is late.
+
+So it runs immediately.
+
+✅ 2️⃣ Second Execution
+
+        Starts at:
+        
+        5
+        
+        Runs 5 seconds
+        Finishes at:
+        
+        10
+
+Now calculate next scheduled time:
+
+        3 + 3 = 6
+        
+        Is 6 < current time (10)?
+        YES → late again.
+
+So it runs immediately.
+
+✅ 3️⃣ Third Execution
+
+        Starts at:
+        
+        10
+        
+        Runs 5 seconds
+        Finishes at:
+        
+        15
+
+Next scheduled time:
+    
+    6 + 3 = 9
+    
+    9 < 15 → late
+    Run immediately.
+
+
+```java
+while (true) {
+    task = delayedQueue.take(); // blocks until a task is ready
+    execute(task);
+}
+```
+
+Each thread does like above to see if there are any task to be executed
+🔹 2️⃣ Waiting Mechanism
+
+Internally, DelayedWorkQueue uses:
+
+ReentrantLock + Condition
+
+Worker thread calls condition.awaitNanos(remainingDelay)
+
+If a new task arrives with an earlier execution time, the thread is signaled to wake up
+
+This is called leader-follower pattern

@@ -163,3 +163,245 @@ Important: Priority is not guaranteed — actual scheduling depends on the OS an
 ![img_2.png](../Images/ThMeth.png)
 
 
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+1️⃣ Thread Lifecycle Methods
+
+These control the start and execution of a thread.
+
+start()
+
+        Starts a new thread and calls run() internally.
+        Thread t = new Thread(() -> System.out.println("Running"));
+        t.start();
+        
+        Important:
+        start() → creates a new OS thread
+        Calling run() directly → no new thread
+
+run()
+
+        Contains the task logic.
+        
+        public void run() {
+        System.out.println("Thread work");
+        }
+2️⃣ Thread Control Methods
+sleep()
+
+        Pauses the current thread.
+        Thread.sleep(2000);
+        Thread goes to TIMED_WAITING
+        Lock is NOT released
+
+yield()
+
+        Hints the scheduler to allow another thread to run.
+        Thread.yield();
+        Not guaranteed.
+
+🔹 What yield() Does
+
+When a thread calls:
+
+Thread.yield();
+
+        it tells the scheduler:
+        "I’m currently running, but if another thread of the same priority wants the CPU, it can run now."
+        Key point: It is only a hint, not a guarantee.
+
+🔹 Thread State Change
+
+Before yield:
+
+        RUNNING
+        
+        After yield:
+        
+        RUNNABLE
+
+The thread goes back to the ready queue.
+
+join()
+
+        Waits for another thread to finish.
+
+t.join();
+
+Example:
+
+        Thread t = new Thread(() -> System.out.println("Task"));
+        t.start();
+        t.join(); // main thread waits
+        3️⃣ Thread Interruption Methods
+        Used to stop blocking threads gracefully.
+
+interrupt()
+t.interrupt();
+
+        Sets interrupt flag.
+
+for a working thread it just sets the interupted falg to true sate remain the same
+If the thread is blocked in methods like:
+
+        Thread.sleep()
+        Object.wait()
+        Thread.join()
+        BlockingQueue.take()
+
+Then interrupt() will:
+
+        Wake the thread
+        Throw InterruptedException
+        Clear the interrupt flag
+
+isInterrupted()
+t.isInterrupted();
+
+        Checks interrupt flag without clearing it.
+
+interrupted()
+Thread.interrupted();
+
+        Static method
+        Checks and clears interrupt flag.
+
+4️⃣ Thread State Methods
+getState()
+
+        Returns thread state.
+        Example states:
+        
+        NEW
+        RUNNABLE
+        BLOCKED
+        WAITING
+        TIMED_WAITING
+        TERMINATED
+
+t.getState();
+5️⃣ Thread Info Methods
+getName() / setName()
+
+    t.setName("Worker-1");
+    System.out.println(t.getName());
+getId()
+
+    Returns thread ID.
+    t.getId();
+
+getPriority() / setPriority()
+
+    t.setPriority(Thread.MAX_PRIORITY);
+    
+    Priority range:
+    
+    1 → MIN_PRIORITY
+    5 → NORM_PRIORITY
+    10 → MAX_PRIORITY
+6️⃣ Static Utility Methods
+currentThread()
+
+    Returns current executing thread.
+
+    Thread.currentThread();
+    
+    Example:
+    System.out.println(Thread.currentThread().getName());
+activeCount()
+
+        Returns number of active threads in current thread group.
+        Thread.activeCount();
+7️⃣ Deprecated / Dangerous Methods (Interview Question)
+
+These exist but should NOT be used.
+
+❌ stop()
+
+Stops thread abruptly.
+
+❌ suspend()
+
+Pauses thread.
+
+❌ resume()
+
+Resumes suspended thread.
+
+Why deprecated?
+
+Can cause deadlocks
+
+Leaves shared resources in inconsistent state
+
+
+
+
+    The thread scheduler is NOT inside the JVM.
+    Scheduling is mainly handled by the Operating System.
+
+🔹 Who Schedules Threads?
+
+                    Component	Role
+                    JVM	Creates Java threads
+                    OS	Schedules threads on CPU
+                    CPU	Executes instructions
+
+Java threads map to native OS threads.
+
+🔹 Flow When You Create a Thread
+
+When you write:
+
+    Thread t = new Thread();
+    t.start();
+
+Steps:
+
+        1️⃣ JVM creates a Thread object in heap
+        2️⃣ JVM asks OS to create a native thread
+        3️⃣ OS thread scheduler decides when it runs
+        4️⃣ CPU executes that thread
+
+So scheduling is done by the OS kernel scheduler.
+
+
+
+
+1️⃣ What Thread.stop() does
+thread.stop();
+
+When this is called:
+
+The JVM forces the thread to terminate immediately
+
+It throws an internal error (ThreadDeath)
+
+The thread stops wherever it is executing
+
+Example:
+
+synchronized(account) {
+account.withdraw(100);
+account.deposit(100);
+}
+
+If stop() happens here:
+
+withdraw completed
+deposit not executed
+thread killed
+
+Now the account state is corrupted.
+
+
+
+Method	    Static / Instance	  How to call
+start() 	  Instance	         t1.start()
+join()	      Instance	         t1.join()
+sleep()	       Static	            Thread.sleep()
+yield()     	Static	      Thread.yield()
+currentThread()	Static	      Thread.currentThread()
+interrupt()	    Instance	        t1.interrupt()
