@@ -440,4 +440,106 @@ NAVIGABLE MAP INTERFACE :
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
+SET :
+
+    A Set is a collection that contains no duplicate elements.
+    It models the mathematical set abstraction.
+    Common implementations: HashSet, LinkedHashSet, TreeSet.
+
+
+| Property                       | Description                                             |
+| ------------------------------ | ------------------------------------------------------- |
+| No Duplicates                  | Only unique elements are allowed                        |
+| Unordered (usually)            | Elements are not guaranteed to maintain insertion order |
+| Allows Null                    | Most implementations allow one null                     |
+| Uses hashing or tree structure | Depends on implementation                               |
+| Not index-based                | No positional access like `get(index)`                  |
+
+
+
+
+HASHSET :
+
+    HashSet is a Set implementation backed by a HashMap.
+    It uses the keys of the HashMap to store elements, with a constant dummy value.
+    It does not maintain any order of elements.
+
+![img.png](../Images/Set1.png)
+
+![img_1.png](../Images/Set2.png)
+![img_2.png](../Images/Set3.png)
+
+![img_3.png](../Images/Set4.png)
+
+
+| Property                          | Explanation                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------------- |
+| **Implements**                    | `Set` interface, `Cloneable`, `Serializable`                                     |
+| **Underlying Data Structure**     | `HashMap` (stores elements as keys in the map)                                   |
+| **Order**                         | **No guaranteed order**; elements are unordered                                  |
+| **Duplicates**                    | **Not allowed**; only one copy of each element is stored                         |
+| **Null Element**                  | **Allowed**; only one `null` element                                             |
+| **Thread Safety**                 | **Not synchronized**; use `Collections.synchronizedSet()` for thread-safe access |
+| **Performance**                   | O(1) average time for `add()`, `remove()`, and `contains()`                      |
+| **Iteration**                     | Uses iterator over the hash table; **order may change if the set is modified**   |
+| **Allows Heterogeneous Elements** | Yes, as long as they are compatible with equals() and hashCode()                 |
+
+
+
+LINKED HASHSET :
+
+    LinkedHashSet is a Set implementation that maintains insertion order.
+    It is backed by a LinkedHashMap internally.
+    It allows null and does not allow duplicates.
+
+![img_4.png](../Images/Set5.png)
+
+| Property                          | Explanation                                                                           |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| **Underlying Data Structure**     | **Hash table + doubly linked list**; hash table for uniqueness, linked list for order |
+| **Order**                         | **Maintains insertion order**; iterates in the order elements were added              |
+| **Duplicates**                    | **Not allowed**; only one copy of each element                                        |
+| **Null Element**                  | **Allowed**; only one `null` element                                                  |
+| **Thread Safety**                 | **Not synchronized**; use `Collections.synchronizedSet()` if needed                   |
+| **Performance**                   | O(1) average time for `add()`, `remove()`, and `contains()`                           |
+| **Iteration**                     | Ordered iteration according to **insertion order**                                    |
+| **Allows Heterogeneous Elements** | Yes, as long as they are compatible with `equals()` and `hashCode()`                  |
+
+
+It doesnot maintain access order like linkedhashmap but only insertion order
+
+TREESET :
+
+    TreeSet is a Set implementation that stores elements in sorted order.
+    It is backed by a TreeMap internally.
+    It does not allow null elements (because it uses compareTo() for sorting).
+
+![img_5.png](../Images/Set6.png)
+
+| Property                      | Explanation                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Underlying Data Structure** | **Red-Black Tree** (self-balancing binary search tree)                                           |
+| **Order**                     | **Sorted order** according to **natural ordering** (Comparable) or **custom Comparator**         |
+| **Duplicates**                | **Not allowed**; only one copy of each element                                                   |
+| **Null Element**              | **Not allowed** (throws NullPointerException)                                                    |
+| **Thread Safety**             | **Not synchronized**; use `Collections.synchronizedSortedSet()` for thread-safe access           |
+| **Performance**               | O(log n) for `add()`, `remove()`, `contains()` due to tree structure                             |
+| **Iteration**                 | Iterates in **sorted order**                                                                     |
+| **Navigable Methods**         | Provides methods like `lower()`, `floor()`, `ceiling()`, `higher()`, `pollFirst()`, `pollLast()` |
+
+
+
+| Feature                     | HashSet                | LinkedHashSet                              | TreeSet                        | ConcurrentSkipListSet          |
+| --------------------------- | ---------------------- | ------------------------------------------ | ------------------------------ | ------------------------------ |
+| **Underlying Structure**    | Hash table (`HashMap`) | Hash table + linked list (`LinkedHashMap`) | Red-Black Tree                 | Skip List (concurrent sorted)  |
+| **Order Maintained**        | None (unordered)       | Insertion order                            | Sorted (natural or comparator) | Sorted (natural or comparator) |
+| **Duplicates Allowed**      | No                     | No                                         | No                             | No                             |
+| **Null Elements**           | Yes, one `null`        | Yes, one `null`                            | No                             | No                             |
+| **Thread Safety**           | No                     | No                                         | No                             | Yes (concurrent)               |
+| **add(E e)**                | O(1) average           | O(1) average                               | O(log n)                       | O(log n)                       |
+| **remove(Object o)**        | O(1) average           | O(1) average                               | O(log n)                       | O(log n)                       |
+| **contains(Object o)**      | O(1) average           | O(1) average                               | O(log n)                       | O(log n)                       |
+| **Iteration Order**         | Unpredictable          | Insertion order                            | Sorted order                   | Sorted order                   |
+| **Iteration Complexity**    | O(n)                   | O(n)                                       | O(n)                           | O(n)                           |
+| **Subset/Range Operations** | Not supported          | Not supported                              | headSet / tailSet / subSet     | headSet / tailSet / subSet     |
 
