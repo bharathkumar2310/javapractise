@@ -326,15 +326,118 @@ Exactly like HashMap but:
     Generally slower than HashMap due to synchronization overhead
 
 
+SInce it was a legacy ds at that time they thought if(map.get(1)) = nul or not present both return same value so no need
+
+
 -----------------------------------------------------------------------------------------------------------------------------------------------
 
 
-LINKEDHASHMAP :
+LINKED HASHMAP :
 
     Maintains insertion order (or access order if configured).
     Slightly slower than HashMap due to maintaining a linked list of entries.
     Useful when you need predictable iteration order.
 
+![img.png](../Images/LHMap1.png)
+
+![img_1.png](../Images/LHMap2.png)
+
+![img_2.png](../Images/LHMap3.png)
+
+![img_3.png](../Images/LHMap4.png)
+
+A LinkedHashMap is basically:
+
+      HashMap + Doubly Linked List
+      HashMap part → provides O(1) lookup (fast access using hash table).
+      Doubly Linked List part → maintains insertion order of entries.
+
+      So when you iterate through it, the elements come in the order they were inserted.
+      Each entry (node) stores key, value, hash, next pointer for bucket chaining, and before/after pointers for the doubly linked list used to maintain order.
+      It also helps in maintaining access order
+      Recently accesed element will go to the last in the dll
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+**_TREE MAP :_**
+      
+      TreeMap is a Map implementation that stores key-value pairs in sorted order of keys.
+      Internally it uses a Red‑Black Tree.
+      Maintains sorted order of keys if comparator not provided ese compartor order
+      TreeMap internally stores entries using a self-balancing binary search tree.
+      Properties of Red-Black Tree:
+            Height remains balanced
+            Ensures operations run in O(log n) time
+      TreeMap doesnot allow  null keys but alow null values because it uses compare() or comapreTo() to maintain order e cant compare null
+      TreeMap is not thread-safe.
+      For synchronization:
+               ```
+               Collections.synchronizedSortedMap(new TreeMap<>());
+               ```
+      Keys must either implement comaparable or provide comparator
+
+![img.png](../Images/TMap1.png)
+![img_1.png](../Images/TMap2.png)
+
+
+SORTED MAP Interface :
+
+| Method                       | Return Type             | Detailed Use                                                                                                                  |
+| ---------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `comparator()`               | `Comparator<? super K>` | Returns the comparator used to order the keys in the map. If the map uses natural ordering (`Comparable`), it returns `null`. |
+| `firstKey()`                 | `K`                     | Returns the **smallest (first) key** currently present in the map according to sorting order.                                 |
+| `lastKey()`                  | `K`                     | Returns the **largest (last) key** currently present in the map.                                                              |
+| `headMap(K toKey)`           | `SortedMap<K,V>`        | Returns a **view of the portion of the map whose keys are strictly less than `toKey`**.                                       |
+| `tailMap(K fromKey)`         | `SortedMap<K,V>`        | Returns a **view of the portion of the map whose keys are greater than or equal to `fromKey`**.                               |
+| `subMap(K fromKey, K toKey)` | `SortedMap<K,V>`        | Returns a **view of the portion of the map whose keys range from `fromKey` (inclusive) to `toKey` (exclusive)**.              |
+| `keySet()`                   | `Set<K>`                | Returns a **set view of all keys in sorted order**.                                                                           |
+| `values()`                   | `Collection<V>`         | Returns a **collection view of all values** in the map.                                                                       |
+| `entrySet()`                 | `Set<Map.Entry<K,V>>`   | Returns a **set view of all key-value pairs** in the map.                                                                     |
+
+
+NAVIGABLE MAP INTERFACE :
+
+
+| Method                                                                   | Return Type         | Detailed Use                                                                                   |
+| ------------------------------------------------------------------------ | ------------------- | ---------------------------------------------------------------------------------------------- |
+| `lowerKey(K key)`                                                        | `K`                 | Returns the **greatest key strictly less than the given key**.                                 |
+| `lowerEntry(K key)`                                                      | `Map.Entry<K,V>`    | Returns the **key-value entry strictly less than the given key**.                              |
+| `floorKey(K key)`                                                        | `K`                 | Returns the **greatest key less than or equal to the given key**.                              |
+| `floorEntry(K key)`                                                      | `Map.Entry<K,V>`    | Returns the **entry less than or equal to the given key**.                                     |
+| `ceilingKey(K key)`                                                      | `K`                 | Returns the **smallest key greater than or equal to the given key**.                           |
+| `ceilingEntry(K key)`                                                    | `Map.Entry<K,V>`    | Returns the **entry greater than or equal to the given key**.                                  |
+| `higherKey(K key)`                                                       | `K`                 | Returns the **smallest key strictly greater than the given key**.                              |
+| `higherEntry(K key)`                                                     | `Map.Entry<K,V>`    | Returns the **entry strictly greater than the given key**.                                     |
+| `firstEntry()`                                                           | `Map.Entry<K,V>`    | Returns the **first (lowest) key-value entry** in the map.                                     |
+| `lastEntry()`                                                            | `Map.Entry<K,V>`    | Returns the **last (highest) key-value entry** in the map.                                     |
+| `pollFirstEntry()`                                                       | `Map.Entry<K,V>`    | Retrieves and **removes the first entry** from the map.                                        |
+| `pollLastEntry()`                                                        | `Map.Entry<K,V>`    | Retrieves and **removes the last entry** from the map.                                         |
+| `descendingMap()`                                                        | `NavigableMap<K,V>` | Returns a **reverse-order view of the map**.                                                   |
+| `descendingKeySet()`                                                     | `NavigableSet<K>`   | Returns a **set of keys in reverse order**.                                                    |
+| `navigableKeySet()`                                                      | `NavigableSet<K>`   | Returns a **sorted set view of the keys**.                                                     |
+| `subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive)` | `NavigableMap<K,V>` | Returns a **portion of the map within the specified key range with control over inclusivity**. |
+| `headMap(K toKey, boolean inclusive)`                                    | `NavigableMap<K,V>` | Returns entries **less than (or optionally equal to) `toKey`**.                                |
+| `tailMap(K fromKey, boolean inclusive)`                                  | `NavigableMap<K,V>` | Returns entries **greater than (or optionally equal to) `fromKey`**.                           |
+
+
+
+![img_2.png](../Images/TMap3.png)
+
+![img_3.png](../Images/TMap4.png)
+
+![img_4.png](../Images/TMap5.png)
+
+
+![img_5.png](../Images/TMap6.png)
+
+
+![img_6.png](../Images/TMap7.png)
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 

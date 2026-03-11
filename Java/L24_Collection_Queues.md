@@ -93,6 +93,8 @@ A Binary Heap is a complete binary tree where:
 
 ![img_4.png](../Images/PQ3.png)
 
+PriorityQueue doesnot allow u to store null because it uses compare ot compareto which doesnot compare null
+
 -------------------------------------------------------------------------------------------------------------------------------------
 
 
