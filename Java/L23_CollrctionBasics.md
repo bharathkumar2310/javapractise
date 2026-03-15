@@ -198,6 +198,16 @@ Since collections didn't share a common interface, iteration APIs were inconsist
 If the collection changed during iteration, it would not detect concurrent modification.
 
 
+| Feature        | Enumeration       | Iterator                        |
+| -------------- | ----------------- | ------------------------------- |
+| Introduced     | Legacy (JDK 1.0)  | Collections framework (JDK 1.2) |
+| Methods        | 2                 | 3                               |
+| Remove element | ❌ Not possible    | ✅ Possible                      |
+| Works with     | Vector, Hashtable | All collections                 |
+| Fail-fast      | ❌ No              | ✅ Yes                           |
+
+
+
 ```java
 
 public interface Iterable<T> {
@@ -383,6 +393,8 @@ COLLECTION INTERFACE
 | `parallelStream()`                      | `Stream<E>`      | Returns parallel stream for parallel processing.                         |
 | `spliterator()`                         | `Spliterator<E>` | Returns a spliterator used by streams for parallel traversal.            |
 
+containsAll It returns true only if the collection contains every element of the given collection.
+
 Both removeAll() and retainALL()  methods return true only if the collection was modified.(if atleast any one element was removed or retained)
 
 Ex for toArray(T[] a) :
@@ -419,8 +431,114 @@ From Object class(Collection does not extend or implemnt only clases like array 
 | `hashCode()`       | `int`       | Returns hash code for hashing structures.        |
 | `toString()`       | `String`    | Returns string representation of the collection. |
 
+1️⃣ equals() Implementation
+Default implementation in Object
+
+    public boolean equals(Object obj) {
+        return (this == obj);
+    }
+
+In String class 
+```java
+public boolean equals(Object anObject) {
+
+    if (this == anObject) {
+        return true;
+    }
+
+    if (anObject instanceof String) {
+        String anotherString = (String) anObject;
+
+        int n = value.length;
+        if (n == anotherString.value.length) {
+
+            char v1[] = value;
+            char v2[] = anotherString.value;
+
+            for (int i = 0; i < n; i++) {
+                if (v1[i] != v2[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+2️⃣ hashCode() Implementation
+Default implementation in Object
+
+    It returns a value derived from memory address.
+
+Conceptually similar to:
+
+    public int hashCode() {
+        return memoryAddressBasedHash;
+    }
+The actual JVM implementation is native.
+
+In String class
+
+```java
+public int hashCode() {
+    int h = hash;
+    if (h == 0 && value.length > 0) {
+        char val[] = value;
+
+        for (int i = 0; i < value.length; i++) {
+            h = 31 * h + val[i];
+        }
+        hash = h;
+    }
+    return h;
+}
+```
 
 
+
+3️⃣ toString() Implementation
+Default implementation in Object
+
+    public String toString() {
+        return getClass().getName() + "@" + Integer.toHexString(hashCode());
+    }
+
+Example output:
+
+    Person@4e25154f
+
+In String class
+
+```java
+public String toString() {
+    return this;
+}
+```
+
+
+Custom toString()
+
+```java
+class Person {
+
+    String name;
+    int age;
+
+    Person(String name, int age){
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{name='" + name + "', age=" + age + "}";
+    }
+}
+
+```
+    
 
 **COLLECTIONS (UTILITY CLASS):**
 

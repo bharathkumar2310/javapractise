@@ -341,7 +341,7 @@ Each intermediate operation creates a new pipeline stage object that holds:
 
 
 | Operation                 | Functional Interface       | Method Signature                                                       | Used For                             | Example                                      | Stateful / Stateless            |
-| ------------------------- | -------------------------- | ---------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------- | ------------------------------- |
+| ------------------------- | -------------------------- | ---------------------------------------------------------------------- |--------------------------------------| -------------------------------------------- | ------------------------------- |
 | **filter()**              | `Predicate<T>`             | `Stream<T> filter(Predicate<? super T> predicate)`                     | Select elements matching a condition | `stream.filter(x -> x > 10)`                 | Stateless                       |
 | **map()**                 | `Function<T,R>`            | `Stream<R> map(Function<? super T,? extends R> mapper)`                | Transform elements                   | `stream.map(x -> x * 2)`                     | Stateless                       |
 | **mapToInt()**            | `ToIntFunction<T>`         | `IntStream mapToInt(ToIntFunction<? super T>)`                         | Convert to `IntStream`               | `stream.mapToInt(x -> x.getAge())`           | Stateless                       |
@@ -353,7 +353,7 @@ Each intermediate operation creates a new pipeline stage object that holds:
 | **sorted()**              | `Comparator<T>` (optional) | `Stream<T> sorted()` / `sorted(Comparator)`                            | Sort elements                        | `stream.sorted()`                            | **Stateful**                    |
 | **peek()**                | `Consumer<T>`              | `Stream<T> peek(Consumer<? super T>)`                                  | Debug / inspect elements             | `stream.peek(System.out::println)`           | Stateless                       |
 | **limit()**               | —                          | `Stream<T> limit(long maxSize)`                                        | Restrict number of elements          | `stream.limit(5)`                            | **Stateful (short-circuiting)** |
-| **skip()**                | —                          | `Stream<T> skip(long n)`                                               | Skip first elements                  | `stream.skip(3)`                             | **Stateful**                    |
+| **skip()**                | —                          | `Stream<T> skip(long n)`                                               | Skip first n elements                | `stream.skip(3)`                             | **Stateful**                    |
 | **takeWhile()** (Java 9+) | `Predicate<T>`             | `Stream<T> takeWhile(Predicate)`                                       | Take elements while condition true   | `stream.takeWhile(x -> x < 10)`              | **Stateful**                    |
 | **dropWhile()** (Java 9+) | `Predicate<T>`             | `Stream<T> dropWhile(Predicate)`                                       | Skip while condition true            | `stream.dropWhile(x -> x < 10)`              | **Stateful**                    |
 | **unordered()**           | —                          | `BaseStream unordered()`                                               | Remove ordering constraint           | `stream.unordered()`                         | Stateless                       |
@@ -495,4 +495,106 @@ So roles are:
 ![img.png](../Images/ParallelStream1.png)
 
 ![img_1.png](../Images/ParallelStream2.png)
+
+
+
+1️⃣ Convert Stream → List
+
+      List<Integer> list =
+      stream.collect(Collectors.toList());
+Result type
+
+      List<T>
+2️⃣ Convert Stream → Set
+
+      Set<Integer> set =
+      stream.collect(Collectors.toSet());
+Result
+
+      Set<T>
+3️⃣ Convert Stream → Map
+
+      Map<Integer, String> map =
+      stream.collect(
+         Collectors.toMap(
+            x -> x,
+            x -> "Value " + x
+         )
+      );
+
+Example
+
+      Stream: 1,2,3
+      Map: {1=Value 1, 2=Value 2, 3=Value 3}
+
+Here:
+
+      Lambda	Meaning
+      x -> x	key
+      x -> "Value"+x	value
+4️⃣ Convert Stream → String (joining)
+
+      String result =
+      stream.collect(Collectors.joining(","));
+
+Example
+
+      Stream: ["A","B","C"]
+
+      Result: "A,B,C"
+5️⃣ Group elements
+
+      Map<Integer, List<String>> map =
+      names.stream()
+      .collect(Collectors.groupingBy(String::length));
+
+Example
+
+      ["Java","Go","Python"]
+
+Result
+
+      {
+      2=[Go],
+      4=[Java],
+      6=[Python]
+      }
+6️⃣ Count elements
+
+      long count =
+      stream.collect(Collectors.counting());
+7️⃣ Sum values
+
+      int sum =
+      numbers.stream()
+      .collect(Collectors.summingInt(x -> x));
+
+
+| Collector      | Result          |
+| -------------- | --------------- |
+| `toList()`     | List            |
+| `toSet()`      | Set             |
+| `toMap()`      | Map             |
+| `joining()`    | String          |
+| `groupingBy()` | Map with groups |
+| `counting()`   | Count           |
+| `summingInt()` | Sum             |
+
+```java
+public static <T> Collector<T, ?, List<T>> toList() {
+return Collector.of(
+   ArrayList::new,                 // supplier
+   List::add,                      // accumulator
+   (left, right) -> {              // combiner
+        left.addAll(right);
+         return left;
+   }
+);}
+```
+
+Accumulator uses the functional interface BiConsumer<A,T> from java.util.function.BiConsumer.
+Combiner uses the functional interface BinaryOperator<A> from java.util.function.BinaryOperator.
+Combiner is used in parallel processing to merge partial results from different threads.
+collect() method internally uses supplier to create a new collection, accumulator to add elements, and combiner to merge results in parallel processing.
+
 

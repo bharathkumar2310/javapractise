@@ -112,3 +112,50 @@ LAMBDA EXPRESSION :
 | **Runnable**      | `void run()`           | nothing   | nothing | execute task/thread          | `() -> System.out.println("Task")` |
 | **Callable<T>**   | `T call()`             | nothing   | result  | async tasks returning result | `() -> 10`                         |
 | **Comparator<T>** | `int compare(T a,T b)` | 2 objects | int     | sorting                      | `(a,b) -> a-b`                     |
+
+
+1️⃣ Default Methods
+
+    A default method provides a default implementation that implementing classes can use or override.
+
+        Can have a method body.
+        Inherited by implementing classes.
+        Can be overridden in implementing classes.
+        Called using object reference.
+
+1️⃣ Static Methods
+
+    A static method belongs only to the interface, not to the implementing class.
+        Not inherited by implementing classes.
+        Cannot be overridden.
+        Must be called using InterfaceName.method().
+        Object.method() will not work.
+
+
+What if 2 interfaces have same default method?
+
+    If a class implements two interfaces that have the same default method signature, it must override that method to resolve the conflict. The compiler will give an error if you do not provide an implementation.
+
+    Example:
+
+    ```java
+    interface A {
+        default void show() { System.out.println("A"); }
+    }
+
+    interface B {
+        default void show() { System.out.println("B"); }
+    }
+
+    class C implements A, B {
+        @Override
+        public void show() {
+            // Must override to resolve conflict
+            A.super.show(); // or B.super.show();
+        }
+    }
+    ```
+
+    
+    No. Normal classes cannot have default methods.
+    default is a keyword only allowed inside interfaces

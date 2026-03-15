@@ -409,7 +409,10 @@ Blocking behavior:
         So get(index) or set(index, value) does not exist in the public API.
         To access elements by position, you need to iterate → O(n).
 
-
+    
+    for(int i = head; i != tail; i = (i + 1) & (elements.length - 1)) {
+        print(elements[i]);
+    }   
 
 | Method                       | Return Type     | Time Complexity | Description                                                                                |
 | ---------------------------- | --------------- | --------------- | ------------------------------------------------------------------------------------------ ||
