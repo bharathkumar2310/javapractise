@@ -964,3 +964,935 @@ public class Test {
 `super` is used to **refer to the immediate parent class** (superclass) members — variables, methods, and constructors.
 
 
+
+
+
+
+A **POJO** stands for **Plain Old Java Object**.  
+It’s a simple Java object that **doesn’t depend on any special framework, library, or external restrictions** — just a plain class that represents data or behavior.
+
+
+### 🧠 **Purpose of POJOs**
+
+- To **represent data** (e.g., `User`, `Employee`, `Product`).
+- To keep your **application decoupled** from frameworks.
+- To make code **clean, readable, and testable**.
+
+
+![[Pasted image 20251012222542.png]]
+
+
+
+## 🧠 1. What is an `enum`?
+
+`enum` (short for **enumeration**) is a **special Java type** that represents a **fixed set of constants**.
+
+Think of it as a **type-safe way** to define a group of related values.
+
+For example: directions, days of the week, states, colors, etc.
+
+---
+
+### ✅ Example
+
+`public enum Day {     MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }`
+
+- Here, `Day` is an **enum type**.
+
+- `MONDAY, TUESDAY, ...` are the **constants**.
+
+- You cannot create any value outside these constants.
+
+## Features of `enum`
+
+1. **Type-safe**  
+   You cannot assign an invalid value:
+
+   `Day today = "FUNDAY"; // ❌ Compile-time error`
+
+2. **Enum constants are objects**  
+   Each constant is actually an **instance of the enum class**.
+
+3. **Can have fields, constructors, and methods**
+
+
+✅ Every enum constant is a **final, singleton, immutable instance**.
+
+
+![[Pasted image 20251012222621.png]]
+
+
+![[Pasted image 20251012223427.png]]
+
+
+public enum ---> should be always public or default so that can e accessed from diff class
+
+constructor should always be private ----> so that we cannot mannually create obj
+
+Example:
+
+
+```
+enum Color {
+    RED, GREEN, BLUE;
+}
+
+```
+
+
+Internally this is like
+
+
+```
+public final class Color extends Enum<Color> {
+
+    // 1. Public static final objects for each constant
+    public static final Color RED = new Color("RED", 0);
+    public static final Color GREEN = new Color("GREEN", 1);
+    public static final Color BLUE = new Color("BLUE", 2);
+
+    // 2. Private array holding all constants (used by values())
+    private static final Color[] VALUES = { RED, GREEN, BLUE };
+
+    // 3. Private constructor
+    private Color(String name, int ordinal) {
+        super(name, ordinal); // calls Enum constructor
+    }
+
+    // 4. values() method to get all constants
+    public static Color[] values() {
+        return VALUES.clone(); // returns a copy of constants array
+    }
+
+    // 5. valueOf() method to get constant by name
+    public static Color valueOf(String name) {
+        for (Color c : VALUES) {
+            if (c.name().equals(name)) return c;
+        }
+        throw new IllegalArgumentException("No enum constant " + name);
+    }
+}
+
+```
+
+
+Every colour RED , GREEN, BLUE is an instance of Color
+
+Every enum by default will have an ordinal that is value 0,1,2 in the above example
+Java converts this enum into a **final class** that extends `java.lang.Enum`.
+
+![[Pasted image 20251012224659.png]]
+
+
+![[Pasted image 20251012230115.png]]
+
+
+
+
+Enum with Custom Values
+
+```
+public enum EnumSample{  
+
+		MONDAY( 101 ,  "1st day of the week"),  
+		
+		TUESDAY(102 , "2nd day of the week"),  
+		
+		WEDNESDAY(103 , "3rd days of the week"),  
+		
+		THURSDAY(104 , "4th day of the week"),  
+		
+		FRIDAY(105 , "5th day of the week"),  
+		
+		SATURDAY(106 , "its 1st WeekOff"),  
+		
+		SUNDAY(107 , "its 2nd WeekOff");  
+		
+		private int val;  
+		
+		private String comment;  
+		
+		EnumSample(int val, String comment){  
+		
+			this.val  = val;  
+			
+			this.comment = comment;  
+		
+		}  
+		
+		public int getVal(){  
+		
+			return val;  
+		
+		}  
+		
+		public String getComment(){  
+		
+			return Comment;  
+		
+		}  
+		
+		public static EnumSample getEnumFromValue(int Value){  
+			
+			for(EnumSample sample : EnumSample.Values() ){  
+			
+				if(sample.val==value){  
+				
+					return sample;  
+				
+				}  
+			
+			}  
+		
+		return null;  
+		
+		}  
+
+}
+```
+
+
+
+![[Pasted image 20251012230811.png]]
+
+![[Pasted image 20251012230820.png]]
+
+
+✅ Each constant is **still an object of `Operation`**, but internally it may be a **compiler-generated anonymous subclass** if you override methods.
+
+
+
+![[Pasted image 20251012230958.png]]
+
+
+
+
+![[Pasted image 20251012231011.png]]
+
+![[Pasted image 20251012231024.png]]
+
+
+![[Pasted image 20251012231035.png]]
+
+![[Pasted image 20251012231050.png]]
+
+
+![[Pasted image 20251012231138.png]]
+
+
+![[Pasted image 20251012231150.png]]
+
+
+![[Pasted image 20251012231159.png]]
+
+
+
+
+
+## 🧩 2️⃣ The Hidden Constructor Parameters
+
+Every enum constant automatically gets two **hidden parameters**:
+
+|Hidden Field|Description|
+|---|---|
+|`name`|the name of the constant (`"NORTH"`)|
+|`ordinal`|the order in which it’s declared (0 for first, 1 for second, etc.)|
+
+So when the compiler creates:
+
+`Direction.NORTH`
+
+It actually becomes:
+
+`new Direction("NORTH", 0);`
+
+---
+
+## 🧠 3️⃣ What If You Add Your Own Constructor?
+
+When you do this:
+
+```
+public enum Direction {
+    NORTH("Up"), SOUTH("Down");
+    private final String desc;
+
+    Direction(String desc) { this.desc = desc; }
+}
+
+```
+
+Then **your constructor** is added _on top of_ the hidden one.  
+But Java still calls `super(name, ordinal)` internally before your constructor runs.
+
+So effectively:
+
+```
+private Direction(String name, int ordinal, String desc) {
+    super(name, ordinal);
+    this.desc = desc;
+}
+
+```
+---
+
+## 🔍 4️⃣ You Can’t Call the Constructor Yourself
+
+Because:
+
+- Enum constructors are **always private** (or package-private).
+
+- You can’t do `new Direction()` — only the JVM creates them.
+
+- The compiler instantiates them exactly once at class loading time.
+
+
+That’s why all enum instances are **singletons**.
+
+
+
+-------------------------------------------------------------------------------------
+
+
+## 🧩 1️⃣ `System.out.println(d)` Calls `toString()`
+
+When you print any object in Java:
+
+`System.out.println(d);`
+
+it actually calls:
+
+`System.out.println(d.toString());`
+
+---
+
+## ⚙️ 2️⃣ `Enum` Class Defines `toString()`
+
+All enums implicitly extend `java.lang.Enum`, and that class defines:
+
+`public abstract class Enum<E extends Enum<E>> implements Comparable<E>, Serializable {     private final String name;     private final int ordinal;      public final String name() {         return name;     }      public String toString() {         return name;     } }`
+
+So by default,  
+👉 `toString()` just returns the `name` of the enum constant — which is `"NORTH"`, `"SOUTH"`, etc.
+
+---
+
+## ✅ 3️⃣ So These Are Equivalent
+
+`System.out.println(d);          // Calls toString() → "NORTH" System.out.println(d.toString()); // Same → "NORTH" System.out.println(d.name());     // Same → "NORTH"`
+
+All three print the same thing **by default**.
+
+---
+
+## ⚙️ 4️⃣ You Can Override `toString()` If You Want Custom Output
+
+Example:
+```
+public enum Direction {
+    NORTH("Upwards"), SOUTH("Downwards"), EAST("Rightwards"), WEST("Leftwards");
+
+    private final String desc;
+
+    Direction(String desc) {
+        this.desc = desc;
+    }
+
+    @Override
+    public String toString() {
+        return desc;
+    }
+}
+
+```
+
+
+Now:
+
+`System.out.println(Direction.NORTH); // Upwards System.out.println(Direction.NORTH.name()); // NORTH System.out.println(Direction.NORTH.toString()); // Upwards`
+
+✅ You can see the difference now:
+
+- `.name()` → always gives the exact identifier name (`"NORTH"`)
+
+- `.toString()` → can be customized (default = same as `name()`)
+
+
+---
+
+## 🧠 5️⃣ Internal Flow (When You Call `valueOf()` and Print)
+
+Here’s what happens line-by-line:
+
+`Direction d = Direction.valueOf("NORTH");`
+
+1. The compiler calls the auto-generated static method:
+
+```
+    public static Direction valueOf(String name) {
+    return Enum.valueOf(Direction.class, name);
+}
+
+```
+
+2. `Enum.valueOf()` looks up `"NORTH"` in the internal constant map.
+
+3. It returns the same singleton instance `Direction.NORTH`.
+
+4. When you print `d`, it calls `toString()` → `"NORTH"`.
+
+
+
+
+
+----------------------------------------------------------------------------------------
+
+
+## 🚨 **19. What happens if you clone an Enum?**
+
+You **can’t clone** an enum.  
+The `clone()` method is overridden in `Enum` to throw `CloneNotSupportedException`.
+
+
+🧭 16. Can Enums be used in collections like HashMap or Set? Yes — and very efficiently. Because enum constants are immutable and have a fast hashCode
+
+```
+enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY }
+
+public class EnumMapExample {
+    public static void main(String[] args) {
+        EnumMap<Day, String> schedule = new EnumMap<>(Day.class);
+
+        schedule.put(Day.MONDAY, "Start strong");
+        schedule.put(Day.FRIDAY, "Finish work");
+
+        for (Day d : schedule.keySet()) {
+            System.out.println(d + " → " + schedule.get(d));
+        }
+    }
+}
+
+```
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------------
+
+
+
+# 🧭 ENUM USAGE IN SPRING BOOT
+
+---
+
+## 1️⃣ **Representing Fixed States or Roles**
+
+Enums are perfect for defining **constants** like:
+
+- Order statuses
+
+- User roles
+
+- Payment methods
+
+- Error codes
+
+
+### Example – User Roles
+
+`public enum Role {     ADMIN,     USER,     GUEST }`
+
+### Usage in Entity:
+
+```
+@Entity
+public class User {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @Enumerated(EnumType.STRING)  // Important: store name, not ordinal
+    private Role role;
+}
+
+```
+
+👉 Why `EnumType.STRING`?
+
+- `EnumType.ORDINAL` saves numbers (0,1,2...) — breaks if order changes.
+
+- `EnumType.STRING` saves actual names ("ADMIN", "USER") — safer and readable.
+
+
+---
+
+## 2️⃣ **Mapping Enum in JPA / Hibernate**
+
+### Example – Order Status
+
+`public enum OrderStatus {     NEW,     PROCESSING,     COMPLETED,     CANCELLED }`
+
+### Entity:
+
+```
+@Entity
+public class Order {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+}
+
+```
+
+### Repository:
+```
+@Repository
+public interface OrderRepository extends JpaRepository<Order, Long> {
+    List<Order> findByStatus(OrderStatus status);
+}
+
+```
+
+
+### Usage:
+
+`List<Order> completed = orderRepository.findByStatus(OrderStatus.COMPLETED);`
+
+✅ Type-safe  
+✅ No magic strings  
+✅ IDE autocompletion
+
+---
+
+## 3️⃣ **Enums in REST APIs**
+
+### Controller Example
+
+```
+@RestController
+@RequestMapping("/orders")
+public class OrderController {
+
+    @GetMapping("/status/{status}")
+    public String getOrdersByStatus(@PathVariable OrderStatus status) {
+        return "Orders with status: " + status;
+    }
+}
+
+```
+
+If you hit:
+
+`GET /orders/status/COMPLETED`
+
+You’ll get:
+
+`Orders with status: COMPLETED`
+
+🧠 Spring automatically converts the path variable `"COMPLETED"` to the enum constant `OrderStatus.COMPLETED`.
+
+---
+
+## 4️⃣ **Enums in Request Body (JSON)**
+
+### Example DTO
+
+```
+`public class PaymentRequest {
+    private PaymentType type;
+    private double amount;
+}
+
+public enum PaymentType {
+    CREDIT_CARD, DEBIT_CARD, UPI
+}
+
+```
+
+### Controller
+
+```
+@PostMapping("/pay")
+public String pay(@RequestBody PaymentRequest request) {
+    return "Paid using " + request.getType();
+}
+
+```
+
+### Request JSON:
+
+`{   "type": "UPI",   "amount": 1500 }`
+
+✅ Automatically converted from JSON string `"UPI"` → `PaymentType.UPI`.
+
+
+
+
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s4827bbe7774a43579219656353f13fa0)
+
+## **What is an Interface in Java?**
+
+An **interface** in Java is a **contract** or **blueprint** that defines **what methods a class must implement**, **but not how**.
+It contains **abstract methods** (and optionally default or static methods) that a class **agrees to implement**.
+
+
+1️⃣ **Abstraction** – Hides implementation details, shows only method definitions.  
+2️⃣ **Loose Coupling** – Depends on interface, not concrete class (easy to switch implementations).  
+3️⃣ **Polymorphism** – One interface type can refer to many implementing objects.  
+4️⃣ **Multiple Inheritance (of Type)** – A class can implement multiple interfaces.  
+5️⃣ **Code Reusability** – Common behavior defined once, reused across classes.
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s9d101d410a254b7c85893012a6b1f25b)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s5ca28c5e0c2f44f192b03d21c88198c3)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s2927fcff047b408b889eb77a2c11db34)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s7b4fc48aff334affb137ab806b40bfd1)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s97a59e6ec9ad4d60b7e0ab59a2f568e4)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sec481a0c1e8644958fd185a584bc08a8)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s0fa95af59ea245aba9543c5030515605)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sf8f1100cf1f34c4795b894ea18b95559)
+
+## 💡 **1️⃣ Class Level**
+
+|Feature|Interface|Abstract Class|
+|---|---|---|
+|**Access Modifier Allowed**|Only `public` or **package-private** (default)|`public`, `protected`, or **package-private**|
+|**Can be declared `final`?**|❌ No (cannot be instantiated or final)|❌ No (must be extendable)|
+|**Can be declared `abstract`?**|Implicitly abstract (no need to mention)|Must explicitly use `abstract` keyword|
+
+
+
+
+
+---
+
+## 💡 **2️⃣ Methods**
+
+|Feature|Interface|Abstract Class|
+|---|---|---|
+|**Access Modifier (Abstract method)**|Always `public` (implicitly)|Can be `public`, `protected`, or package-private|
+|**Default methods (Java 8+)**|Must be `public`|N/A|
+|**Static methods (Java 8+)**|Must be `public`|Any modifier (`public`, `protected`, `private`)|
+|**Private methods (Java 9+)**|✅ Allowed (only for reuse inside interface)|✅ Allowed|
+|**Final methods**|❌ Not allowed|✅ Allowed|
+|**Abstract methods count**|All methods are abstract by default (unless default/static)|Some can be abstract, others concrete|
+
+{ } }`
+
+---
+
+## 💡 **3️⃣ Fields (Variables)**
+
+|Feature|Interface|Abstract Class|
+|---|---|---|
+|**Access Modifier**|Always `public static final` (constants)|Can be any (`private`, `protected`, `public`)|
+|**Value Requirement**|Must be initialized at declaration|Optional (can be uninitialized)|
+|**Mutable?**|❌ No (since `final`)|✅ Yes (if not final)|
+
+
+---
+
+## ⚙️ **4️⃣ Object Rules**
+
+|Feature|Interface|Abstract Class|
+|---|---|---|
+|**Instantiation**|❌ Not possible|❌ Not possible|
+|**Implements / Extends**|Implemented by a class (`implements`)|Extended by a class (`extends`)|
+|**Multiple inheritance**|✅ Allowed (class can implement many interfaces)|❌ Not allowed (only one abstract class)|
+|**Constructors**|❌ Not allowed|✅ Allowed|
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s5f432b40f7384cba9c4275dcaea980d5)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sbd9d9920d5dd4c0a96394da9db6e714e)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sbd24d9357e82480c88d436fa9f59a65d)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s499a64163acf4110a7c1cd4b92ceddcf)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s0e24e3cd96664f70878fead57d696f44)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s816c34f42b6b4f28824eceab2f9e9f22)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sdea5359b5afd494fa2c3e78d5e741dd7)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s1c64acf972404b25a45ae140571e54bc)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s2fec6579be394f3eaeca827b4a7307d2)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s802868e154e5498e8b976457816ac471)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s43194d01407745c98b634177efe77b14)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sbbc6d666a3c5445096ca62729ee684a5)
+
+
+
+
+## **1️⃣ Can abstract classes have constructors?**
+
+✅ **Yes**, abstract classes **can have constructors**.
+
+`abstract class Vehicle {     Vehicle() {         System.out.println("Vehicle constructor called");     }     abstract void start(); }`
+
+- You **can define constructors** in an abstract class.
+
+- The constructor **runs when a subclass object is created**, not for the abstract class itself.
+
+
+---
+
+## **2️⃣ Why can’t you create an object of an abstract class?**
+
+- Abstract classes are **incomplete** — they may have **abstract methods with no body**.
+
+- If Java allowed `new Vehicle()`, there would be **no implementation for `start()`**, so what would the JVM run?
+
+- **Cannot instantiate something that is incomplete**.
+
+
+`Vehicle v = new Vehicle(); // ❌ Compilation Error`
+
+---
+
+## **3️⃣ Then what’s the purpose of a constructor in an abstract class?**
+
+- **To initialize fields and run code** when a **subclass object** is created.
+
+```
+class Car extends Vehicle {
+    Car() {
+        super(); // Calls Vehicle constructor
+        System.out.println("Car constructor called");
+    }
+    void start() {
+        System.out.println("Car started");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Vehicle v = new Car();
+        // Output:
+        // Vehicle constructor called
+        // Car constructor called
+    }
+}
+
+```
+
+
+✅ Notice: `Vehicle()` runs **through the subclass**, never directly.
+
+
+
+![[Pasted image 20251015110826.png]]
+
+
+
+![[Pasted image 20251015110844.png]]
+
+
+A nested class can have private but a top level class can be public or default only.
+Private means it is acessible within a class if u declare a class as private u say that class is
+private to what? it looks meaningless
+
+Similarly for static also
+
+
+Making a constructor `final` is meaningless because **constructors cannot be overridden**, so the compiler forbids it.
+
+- **`static`** means: _belongs to the class, not an instance_.
+- **Constructors are used to create instances**.
+- If you made a constructor `static`, it would exist **without an instance**, which **contradicts its purpose**.
+
+
+
+| Feature         | public | protected | default | private | final | static | abstract |
+| --------------- | ------ | --------- | ------- | ------- | ----- | ------ | -------- |
+| Top-level class | ✅      | ❌         | ✅       | ❌       | ✅     | ❌      | ❌        |
+| Concrete method | ✅      | ✅         | ✅       | ✅       | ✅     | ✅      | ❌        |
+| Constructor     | ✅      | ✅         | ✅       | ✅       | ❌     | ❌      | ❌        |
+-- A **private method** is visible **only within the class it is declared**.
+- Subclasses **cannot see it**, so they **cannot override it**.
+-----------------------------------------------------------------------------------------------------
+
+An **abstract class** in Java is a **class that cannot be instantiated directly** and is intended to serve as a **base class for other classes**. It can contain **abstract methods (without a body) and concrete methods (with a body)**.
+
+![[Pasted image 20251015112449.png]]
+An **abstract class can exist without any abstract methods**.
+
+| Feature        | public | protected | default | private           | final             | static                    | abstract                      |
+| -------------- | ------ | --------- | ------- | ----------------- | ----------------- | ------------------------- | ----------------------------- |
+| Abstract class | ✅      | ❌         | ✅       | ❌                 | ❌                 | ❌ (top-level), ✅ (nested) | ✅                             |
+| Method         | ✅      | ✅         | ✅       | ✅ (concrete only) | ✅ (concrete only) | ✅ (concrete only)         | ✅ (must override in subclass) |
+| Constructor    | ✅      | ✅         | ✅       | ✅                 | ❌                 | ❌                         | ❌                             |
+
+
+![[Pasted image 20251015112519.png]]
+![[Pasted image 20251015112540.png]]
+
+------------------------------------------------------------------------------------------
+
+
+![[Pasted image 20251015115152.png]]
+
+
+![[Pasted image 20251015115213.png]]
+
+
+----------------------------------------------------------------------------------
+
+
+
+
+![[Pasted image 20251015120925.png]]
+
+![[Pasted image 20251015121000.png]]
+
+
+
+![[Pasted image 20251015121022.png]]
+
+
+
+![[Pasted image 20251015121042.png]]
+
+
+
+![[Pasted image 20251015121100.png]]
+
+![[Pasted image 20251015121119.png]]
+
+
+
+
+![[Pasted image 20251015121150.png]]
+
+
+
+![[Pasted image 20251015121206.png]]
+
+
+
+![[Pasted image 20251015121227.png]]
+
+
+
+![[Pasted image 20251015121247.png]]
+
+
+![[Pasted image 20251015121315.png]]
+
+
+-------------------------------------------------------------------------------------
+
+|Class Type|public|protected|default|private|final|static|abstract|Notes|
+|---|---|---|---|---|---|---|---|---|
+|Top-level concrete|✅|❌|✅|❌|✅|❌|❌|Only public or package-private|
+|Top-level abstract|✅|❌|✅|❌|❌|❌|✅|Cannot be final, static top-level not allowed|
+|Nested concrete|✅|✅|✅|✅|✅|✅|❌|Can be private, static allowed|
+|Nested abstract|✅|✅|✅|✅|❌|✅|✅|Can be private/protected/public; static allowed|
+
+
+|Method Type|public|protected|default|private|final|static|abstract|Notes|
+|---|---|---|---|---|---|---|---|---|
+|Concrete method|✅|✅|✅|✅|✅|✅|❌|Can combine static/final|
+|Abstract method|✅|✅|✅|❌|❌|❌|✅|Must be overridden by subclass|
+|Nested class methods|Same rules as above|||||||Inherited rules apply|
+
+
+| Constructor Type | public | protected | default | private | final | static | Notes                                       |
+| ---------------- | ------ | --------- | ------- | ------- | ----- | ------ | ------------------------------------------- |
+| Concrete class   | ✅      | ✅         | ✅       | ✅       | ❌     | ❌      | Private used for Singleton/factory patterns |
+| Abstract class   | ✅      | ✅         | ✅       | ✅       | ❌     | ❌      | Called via `super()` from subclass          |
