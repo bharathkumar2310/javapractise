@@ -531,7 +531,6 @@ In OOP:
 ### **A. Compile-Time Polymorphism (Static)**
 
 - Achieved by **method overloading** or **operator overloading**
-
 - Determined **at compile time**
 
 
