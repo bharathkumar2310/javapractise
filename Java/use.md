@@ -1,1385 +1,885 @@
+## 1️⃣ What is a Singleton?
 
-## 💡 What is **OOP (Object-Oriented Programming)**?
+A **Singleton** is a **design pattern** (**Creational Design Pattern**.)where a class is designed to have:
 
-**OOP** — or **Object-Oriented Programming** — is a programming paradigm (a style of structuring code) based on the concept of **objects**, which represent **real-world entities**.  
-Each object has:
+1. **Only one instance** throughout the JVM.
+2. **Global access point** to that instance.
 
-- **Data (attributes or fields)**
-- **Behavior (methods or functions)**
-### 🎯 Goal of OOP:
+✅ Use cases:
 
-To make software **modular**, **reusable**, **scalable**, and **easier to maintain** by modeling real-world systems.
-**Modular** means **dividing a big program into small, independent, reusable pieces called _modules_**.`
+- Logger
+- Configuration manager
+- Thread pool manager
+- Cache manager
 
-```
-class Car {
-    // attributes
-    String color;
-    int speed;
 
-    // behavior
-    void drive() {
-        System.out.println("Car is driving");
-    }
-}
+---
 
-public class Main {
-    public static void main(String[] args) {
-        Car car1 = new Car(); // object creation
-        car1.color = "Red";
-        car1.speed = 120;
-        car1.drive(); // calling method
-    }
-}
+## 2️⃣ Key Properties
 
-```
+| Property                 | Explanation                                 |
+| ------------------------ | ------------------------------------------- |
+| Single instance          | Only one object of the class exists         |
+| Global access            | Accessible from anywhere in the application |
+| Controlled instantiation | Constructor is **private**                  |
+## **1️⃣ What is Singleton?**
 
+A **singleton** is a class that **allows only one instance to be created** in the entire application.
 
-## 🔄 What is **Procedural Programming**?
+- Example: `Runtime`, `Desktop`, `Logger`.
 
-**Procedural programming** is a paradigm where programs are built using **functions (procedures)** and **data structures** separately.  
-It focuses on **what to do** and **how to do it** step-by-step.
+- **Key idea:** Single point of control.
 
-```
-#include <stdio.h>
 
-int speed = 120;
+---
 
-void drive() {
-    printf("Car is driving at %d km/h", speed);
-}
+## **2️⃣ Why we need Singleton?**
 
-int main() {
-    drive();
-    return 0;
-}
+### **A. Single Point of Control**
 
-```
+- Some resources should only have **one instance**, e.g.:
 
-Here:
+    - Database connection pool manager
 
-- The code focuses on **functions (procedures)**, not on **objects**.
-- Data (`speed`) and behavior (`drive`) are **separate**.
+    - Configuration manager
 
+    - Logging utility
 
-| Feature                 | **Procedural Programming**                | **Object-Oriented Programming (OOP)**                |
-| ----------------------- | ----------------------------------------- | ---------------------------------------------------- |
-| **Basic Unit**          | Function or Procedure                     | Object (Instance of Class)                           |
-| **Focus**               | Focuses on actions (functions)            | Focuses on data (objects)                            |
-| **Data Handling**       | Data and functions are separate           | Data and functions are encapsulated together         |
-| **Data Access**         | Any function can access data              | Access controlled via encapsulation (private/public) |
-| **Reusability**         | Code reuse via functions                  | Code reuse via classes and inheritance               |
-| **Security**            | Less secure (data easily accessible)      | More secure (data hiding via access modifiers)       |
-| **Examples**            | C, Pascal                                 | Java, C++, Python, C#                                |
-| **Extensibility**       | Hard to extend and maintain large systems | Easy to extend using inheritance and polymorphism    |
-| **Real-World Modeling** | Poor mapping to real-world entities       | Directly models real-world entities as objects       |
 
+`Logger logger = Logger.getInstance(); logger.log("Hello");`
 
+- If multiple instances existed, you could get **inconsistent logs or configs**.
 
----------------------------------------------------------------------------------------
 
-## 💡 What is a **Class**?
+---
 
-A **class** is a **blueprint or template** for creating objects.  
-It defines **how an object should look** (its data/attributes) and **how it should behave** (its methods).
+### **B. Resource Efficiency**
 
+- Avoids **unnecessary object creation**.
 
-## 🚗 What is an **Object**?
+- Example:
 
-An **object** is a **real-world instance** of a class.  
-It is created from the class blueprint and represents **a specific entity** with actual data.
 
-👉 Think of it like **building a real car** from the “Car” blueprint.
+`ConnectionPool pool = ConnectionPool.getInstance();`
 
+- Only **one pool** manages all DB connections → saves memory and CPU.
 
---------------------------------------------------------------------------------
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1sd2f258ef18f04c648cc9097d45586384)
 
-## 💡 What is **Abstraction**?
 
-**Abstraction** means **hiding the complex internal details** and **showing only the essential features** of an object.
-It focuses on **what an object does**, not **how it does it**.
 
+# ✅ **1. Why `static`?**
 
-|Purpose|Description|
-|---|---|
-|✅ **Hide complexity**|Users don’t need to know how something works internally.|
-|✅ **Increase security**|Internal logic is hidden from outside interference.|
-|✅ **Improve modularity**|Code becomes cleaner and easier to maintain.|
-|✅ **Enhance flexibility**|You can change the implementation without affecting users.|
-Security : By exposing **only the necessary methods** and hiding the rest, users can’t accidentally call dangerous internal methods
+### ✔️ Because the object must belong to the _class_, not to objects
 
-## 🌍 **Real-World Example: ATM Machine**
+If the instance is NOT static, then you need to create an object of the class to access it — which defeats the purpose of Singleton.
 
-When you go to an ATM and press **“Withdraw ₹1000”**,  
-you don’t care how the ATM:
+Key rules of Singleton:
 
-- Connects to the bank server
-- Verifies your PIN
-- Updates your account balance
-- Dispenses cash
+- only **one instance** in JVM
 
-You only see **simple buttons (Withdraw, Check Balance, Deposit)** —  
-the **complex logic is hidden** from you.
+- instance should be created **without creating any other object**
 
-That’s **Abstraction**.
-✅ **You only see:** What operations are available.
+- should be accessed globally using `ClassName.getInstance()`
 
 
-## 1️⃣ **Spring Data JPA Repositories**
+A `static` variable:
 
-```
-public interface UserRepository extends JpaRepository<User, Long> {
-    List<User> findByName(String name);
-}
+- lives for the whole JVM lifetime
 
-```
+- belongs to the class, loaded once
 
-**What’s happening:**
-- You only **declare an interface** (`UserRepository`) — this is **abstraction**.
+- is shared by all threads
 
-- You **don’t write any SQL or implementation code**.
 
-- Spring provides the **actual implementation at runtime**.
+So `static` ensures:
 
+`Only one instance exists`
 
-✅ **Abstraction point:** You interact only with the interface; Spring hides the implementation of CRUD
+---
 
-#### There are **two main ways** to achieve abstraction in Java: **abstract classes** and **interfaces**.
+# ✅ **2. Why `private`?**
 
+### ✔️ Because it must NOT be accessible directly from outside
 
+If it was `public`:
 
---------------------------------------------------------------------------------------
+`public static Singleton instance = new Singleton();`
 
-## 💡 **What is Encapsulation?**
+Any code could modify it:
 
-**Encapsulation** is the concept of **wrapping data (variables) and methods (functions) that operate on that data into a single unit (class)** and **restricting direct access to some of the object’s components**.
+`Singleton.instance = null;        // BAD Singleton.instance = new Singleton(); // BAD`
 
-- Typically, **variables are `private`**
-- Access is provided through **public methods** (`getters` and `setters`)
--
-> Think of it as putting a **protective shield around your data** so only controlled access is allowed.
+Then you lose Singleton behavior.
 
+Also, if instance is `public`, callers can do:
 
-| Use                      | Explanation                                          |
-| ------------------------ | ---------------------------------------------------- |
-| **Data Hiding**          | Protects internal state from unintended modification |
-| **Improves Security**    | Sensitive data can’t be accessed directly            |
-| **Code Maintainability** | Changing internal logic doesn’t affect external code |
-| **Controlled Access**    | Validations can be applied before changing data      |
-| **Modularity**           | Each class is a self-contained unit                  |
+`Singleton.instance`
 
+Which bypasses any logic you might want in `getInstance()`.
 
-## 🌍 **Real-World Examples**
+Keeping it **private** ensures:
 
-### 1️⃣ Bank Account
+- no one can overwrite it
 
-- You can **deposit or withdraw** money, but you **cannot directly change the balance**.
+- no one can create multiple instances
 
-```
-class BankAccount {
-    private double balance; // hidden data
+- full control is with the class
 
-    public BankAccount(double initialBalance) {
-        balance = initialBalance;
-    }
+   
 
-    public void deposit(double amount) {
-        if(amount > 0) balance += amount;
-    }
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1s25753708b7784f37b8065ec3b95fdb0e)
 
-    public void withdraw(double amount) {
-        if(amount > 0 && amount <= balance) balance -= amount;
-    }
 
-    public double getBalance() {
-        return balance;
-    }
-}
 
-```
+   
 
-**Why encapsulation:**
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1s8de36cefbf934dceae1d13d9e4a5b917)
 
-- `balance` is **private** → can’t be changed directly
-- All operations go through **controlled methods** → safe access
 
+- ✅ Simple, thread-safe
+- ❌ Instance created even if never used (may waste memory)
+ -------------------------------------------------------------------------------
+ 
 
-Encapsulation is achieved by:
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1sf0103575b449497a9dbd553221060169)
 
-1. **Making class variables private**
-2. **Providing public getter and setter methods** to access or modify the private variables
 
+- ✅ Only created when first needed
+
+- ❌ **Not thread-safe** — multiple threads can create multiple instances
 
 ------------------------------------------------------------------------------------
 
-## 💡 **What is Inheritance?**
 
-**Inheritance** is an **OOP concept** where a **class (child/subclass)** can **inherit fields and methods from another class (parent/superclass)**.
+   
 
-- Promotes **code reusability**
-- Supports **hierarchical relationships**
-- Enables **polymorphism** (a subclass can be treated as its parent type)
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1s5ed791d584014a54a83889fded7ee429)
 
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1sf209acef571b4be7a3f0ac3168ca1fa9)
 
-|Type|Description|Example|
-|---|---|---|
-|**Single Inheritance**|Child inherits from a single parent|`Child extends Parent`|
-|**Multilevel Inheritance**|Chain of inheritance|`GrandChild extends Child extends Parent`|
-|**Hierarchical Inheritance**|Multiple children inherit from a single parent|`Child1 extends Parent`, `Child2 extends Parent`|
-|**Multiple Inheritance** (Not directly in Java)|Child inherits from multiple parents (use interfaces)|`class Child implements Interface1, Interface2`|
 
+- - ✅ Thread-safe
 
+- ❌ Synchronization slows down performance
+----------------------------------------------------------------------------------------
 
-|Advantage|Description|
-|---|---|
-|**Code Reusability**|No need to write common fields/methods again|
-|**Method Overriding / Polymorphism**|Child can provide its own implementation|
-|**Logical Hierarchy**|Represents real-world relationships|
-|**Extensibility**|Easily extend functionality without changing existing code|
 
+   
 
-**Animals / Biology Example**
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1se9730476898d4f4a871b1522afbe87bf)
 
-- **Parent:** Animal
-    - Common features: eat(), sleep(), breathe()
-- **Child:** Dog, Cat, Bird
-    - Dog → bark()
-    - Cat → meow()
-    - Bird → fly()
 
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1s6127b6f9bcc144638c262f8909fd560e)
 
-**Why inheritance?**
+- ✅ Thread-safe, performant
 
-- All animals share basic features → **reusability**
-- Each species has **specialized features** → **extension**
+- `volatile` ensures **proper visibility** across threads
 
+  ---------------------------------------------------------------------------------
 
-## 2️⃣ **Why is Multiple Inheritance Not Allowed?**
-### A. **Damond Problem**
-- Consider this scenario:
-  `A    / \   B   C    \ /     D`
 
-- **B and C inherit from A**, D inherits from **both B and C**
+   
 
-- **Problem:** If `A` has a method `show()`, and both `B` and `C` override it, **which version should D inherit?**
-```
-class A { void show() { System.out.println("A"); } }
-class B extends A { void show() { System.out.println("B"); } }
-class C extends A { void show() { System.out.println("C"); } }
-// class D extends B, C {} // ❌ Conflict!
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1sa26edb64b6e14297ada2c479a8acdd4e)
 
-```
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1s66ae24a360594d628daa1ac0525006e1)
 
 
+- ✅ Lazy-loaded
 
-- **Ambiguity arises** → compiler doesn’t know whether to call `B.show()` or `C.show()`
+- ✅ Thread-safe (classloader guarantees)
 
-- This is called the **diamond problem**.
-
-
-## 2️⃣ **Interfaces in Java Solve Diamond Problem**
-
-- Interfaces **do not have method implementations** (before Java 8)
-- Even with **default methods (Java 8+)**, **ambiguity is resolved explicitly**
-  In default method compiler will force u to override
-
-
-
-
-## 1️⃣ **Basic Rules**
-
-When you create an object of a **child class**:
-
-```
-class Parent {
-    Parent() { System.out.println("Parent constructor"); }
-}
-
-class Child extends Parent {
-    Child() { System.out.println("Child constructor"); }
-}
-
-public class Main {
-    public static void main(String[] args) {
-        Child c = new Child();
-    }
-}
-
-```
-
-```
-Parent constructor
-Child constructor
-
-```
-
-
-**What happens internally:**
-
-1. **Memory allocation**: Java allocates memory for the **entire object**, including **Parent part** + **Child part**.
-2. **Parent constructor call**: The **Parent constructor executes first** (even if not explicitly called) using `super()`.
-3. **Child constructor call**: Then the **Child constructor executes**.
-
-> **Rule:** Parent constructor always runs **before** child constructor.
-
-
-
-```
-Parent p = new Child();
-
-```
-Only methods available in Parent can be accessed (unless overridden)
-
-Object contains both parent and child parts internally
-
-Used in polymorphism
-
-```
-p.display();   // calls overridden method if present in child
-// p.childMethod(); // ❌ not allowed
-
-```
-
---------------------------------------------------------------------------------
-
-
-
-## 💡 **What is Polymorphism?**
-
-**Polymorphism** means **“many forms”**.
-
-In OOP:
-
-> A single entity (method, object, or operator) can behave differently in different contexts.
-
-- It allows **one interface to be used for multiple forms of behavior**.
-
-- Polymorphism is tightly connected with **inheritance** and **interfaces**.
-
-
-
-
-![[Pasted image 20251110095802.png]]
-
-
-|Purpose|Explanation|
-|---|---|
-|**Code Reusability**|Same method name works for different types of objects|
-|**Flexibility / Extensibility**|Add new functionality without changing existing code|
-|**Maintainability**|Reduce multiple if-else or switch cases|
-|**Dynamic Behavior**|Runtime decisions can be made automatically based on object type|
-
-### **A. Compile-Time Polymorphism (Static)**
-
-- Achieved by **method overloading** or **operator overloading**
-
-- Determined **at compile time**
-
-
-**Example: Method Overloading**
-
-```
-class Calculator {
-    int add(int a, int b) { return a + b; }
-    double add(double a, double b) { return a + b; }
-}
-
-Calculator calc = new Calculator();
-System.out.println(calc.add(2, 3));       // calls int version
-System.out.println(calc.add(2.5, 3.5));   // calls double version
-
-```
-
-✅ Same method name (`add`) behaves differently based on **parameter type**.
-
-### **Rule 1: Must have different parameters**
-
-- You can overload a method if the **number of parameters** or **types of parameters** differ.
-```
-    class Calculator {
-    int add(int a, int b) { return a + b; }
-    double add(double a, double b) { return a + b; }
-}
-
-```
-
-
-✅ Valid: parameter list is different (int vs double)
-
----
-
-### **Rule 2: Return type alone cannot overload a method**
-
-- If two methods have **same name and parameters** but different return types → ❌ NOT allowed.
-
-```
-int add(int a, int b) { return a + b; }
-double add(int a, int b) { return a + b; } // ❌ Compile-time error
-
-```
-
-The **compiler** decides **which function to call** _before_ the program runs.
-
-
----
-
-### **B. Run-Time Polymorphism (Dynamic)**
-
-- Achieved by **method overriding**
-- Determined **at runtime** based on actual object type
-- Often used with **upcasting**
-
-
-**Example:**
-
-```
-class Animal {
-    void sound() { System.out.println("Animal makes sound"); }
-}
-
-class Dog extends Animal {
-    void sound() { System.out.println("Dog barks"); }
-}
-
-class Cat extends Animal {
-    void sound() { System.out.println("Cat meows"); }
-}
-
-public class Main {
-    public static void main(String[] args) {
-        Animal a1 = new Dog();
-        Animal a2 = new Cat();
-
-        a1.sound();  // Dog barks
-        a2.sound();  // Cat meows
-    }
-}
-
-```
-
-✅ Same method call (`sound()`) behaves differently **depending on object type**.
-
-
-## 1️⃣ **What’s happening here?**
-
-### **Step 1: Upcasting**
-
-- `a1` is of type `Animal` (parent class)
-- `new Dog()` creates a **Dog object** (child class)
-- **Assigning child object to parent reference** is called **upcasting**
-
-✅ Same applies for `a2 = new Cat()`
-
----
-
-### **Step 2: Memory Layout**
-
-- Even though the reference is of type `Animal`, the **actual object is Dog**.
-- Memory allocated contains both **Animal fields** + **Dog fields** (if any).
-
-
----
-
-### **Step 3: Method Calls (Dynamic Polymorphism)**
-
-`a1.sound(); // Calls Dog’s overridden sound() 
- a2.sound(); // Calls Cat’s overridden sound()`
-
-- Java determines at **runtime** which `sound()` method to call → **runtime polymorphism**.
-
-- **Rule:** The **object’s actual type** decides the method execution, not the reference type.
-
-
----
-
-### **Step 4: Access Limitation**
-
-- Only **methods/fields in the parent (Animal) are directly accessible** through `a1` or `a2`
-- Child-specific methods cannot be called directly:
-
-
-`a1.sound();      // ✅ works a1.bark();       // ❌ compile-time error, Animal doesn’t have bark()`
-
-- To call child-specific methods, you need **downcasting**:
-
-
-`((Dog)a1).bark(); // ✅ cast to Dog first`
-
----
-
-## 2️⃣ **Why is this Useful?**
-
-- Lets you **write generic code for all animals**:
-
-
-```
-Animal[] animals = { new Dog(), new Cat(), new Lion() };
-for(Animal a : animals) {
-    a.sound(); // calls the correct sound() for each type
-}
-
-```
-
-- You don’t need **if-else for each animal type** → **polymorphism simplifies code**.
--------------------------------------------------------------------------------
-
-# **1️⃣ IS-A Relationship**
-
-### **Definition**
-
-> **IS-A relationship** represents **inheritance**.  
-> It means **one class is a type of another class**.
-- Formed using **`extends`** (for classes) or **`implements`** (for interfaces).
-- Shows **hierarchical relationship**.
-
-```
-class Animal {
-    void eat() { System.out.println("Animal eats"); }
-}
-
-class Dog extends Animal {
-    void bark() { System.out.println("Dog barks"); }
-}
-
-public class Main {
-    public static void main(String[] args) {
-        Dog d = new Dog();
-        d.eat();  // inherited from Animal
-        d.bark(); // own method
-    }
-}
-
-```
-
-Here, **Dog IS-A Animal**.
-
-
-# **HAS-A Relationship**
-
-### **Definition**
-
-> **HAS-A relationship** represents **composition or aggregation**.  
-> It means **one class contains another class as a field**.
-
-- Shows **part-of relationship**.
-- Formed by **including objects of other classes as fields**.
-
-```
-class Engine {
-    void start() { System.out.println("Engine starts"); }
-}
-
-class Car {
-    private Engine engine; // Car HAS-A Engine
-
-    Car() {
-        engine = new Engine(); // composition
-    }
-
-    void startCar() {
-        engine.start();
-        System.out.println("Car starts");
-    }
-}
-
-public class Main {
-    public static void main(String[] args) {
-        Car c = new Car();
-        c.startCar();
-    }
-}
-
-```
-
-
-
-
-![[Pasted image 20251110095955.png]]
-
-
-
-
-
-
-## 2️⃣ Aggregation Example — _Weak “has-a”_
-
-👉 Relationship: **Student has-a Department**
-
-Even if the student is deleted, the department can still exist independently.
-
-### ✅ Example
-```
-class Department {
-    String name;
-
-    Department(String name) {
-        this.name = name;
-    }
-}
-
-class Student {
-    String name;
-    Department department; // Aggregation
-
-    Student(String name, Department department) {
-        this.name = name;
-        this.department = department;
-    }
-
-    void displayInfo() {
-        System.out.println(name + " belongs to " + department.name + " department");
-    }
-}
-
-public class AggregationExample {
-    public static void main(String[] args) {
-        Department cs = new Department("Computer Science");
-        Student s1 = new Student("Bharath", cs);
-
-        s1.displayInfo();
-
-        // Even if s1 is null, Department still exists
-        s1 = null;
-        System.out.println("Department still exists: " + cs.name);
-    }
-}
-
-```
-
-### 🧾 Output:
-
-`Bharath belongs to Computer Science department Department still exists: Computer Science`
-
-✅ `Department` is independent of `Student`  
-That’s **aggregation**.
-
----
-
-## 🧱 3️⃣ Composition Example — _Strong “has-a”_
-
-👉 Relationship: **Car has-a Engine**
-
-If the car is destroyed, its engine **must** be destroyed too — it cannot exist without the car.
-
-### ✅ Example
-
-```
-class Engine {
-    void start() {
-        System.out.println("Engine started...");
-    }
-}
-
-class Car {
-    private Engine engine; // Composition — Car owns Engine
-
-    Car() {
-        engine = new Engine(); // Engine is created when Car is created
-    }
-
-    void startCar() {
-        engine.start();
-        System.out.println("Car started...");
-    }
-}
-
-public class CompositionExample {
-    public static void main(String[] args) {
-        Car car = new Car();
-        car.startCar();
-        // When car is destroyed, its engine will also be gone (no independent existence)
-    }
-}
-
-```
-### 🧾 Output:
-
-`Engine started... Car started...`
-
-✅ The `Engine` object only exists **inside** the `Car`.  
-No car = no engine.  
-That’s **composition**.
-
-
-
-
------------------------------------------------------------------------------------------
-
-## **1️⃣ What is Coupling?**
-
-### 🔹 **Definition:**
-
-**Coupling** is the **degree of dependency between two classes or modules.**  
-It tells you **how strongly one class is connected to another**.
-
-- **Tightly coupled** → One class is heavily dependent on another.
-
-- **Loosely coupled** → Classes are independent; they communicate through interfaces or abstractions.
-
-
----
-
-### ✅ **Example:**
-
-#### ❌ **Tight Coupling**
-
-```
-class Engine {
-    void start() { System.out.println("Engine starting..."); }
-}
-
-class Car {
-    Engine engine = new Engine();  // tightly bound to specific Engine
-    void startCar() {
-        engine.start();
-    }
-}
-
-```
-
-- If we replace `Engine` with `ElectricEngine`, we must modify `Car` class.
-
-- Not flexible — violates _Open/Closed Principle_.
-
-
----
-
-#### ✅ **Loose Coupling**
-
-```
-interface Engine {
-    void start();
-}
-
-class PetrolEngine implements Engine {
-    public void start() { System.out.println("Petrol engine starting..."); }
-}
-
-class Car {
-    private Engine engine;
-    Car(Engine engine) { this.engine = engine; } // injected dependency
-    void startCar() { engine.start(); }
-}
-
-public class Test {
-    public static void main(String[] args) {
-        Engine e = new PetrolEngine();
-        Car car = new Car(e); // flexible dependency
-        car.startCar();
-    }
-}
-
-```
-- Now `Car` depends only on **interface**, not implementation.
-
-- You can swap in `DieselEngine`, `ElectricEngine`, etc.  
-  ✅ **Loose coupling → better flexibility and testability.**
-
-
----
-
-### 🧠 **Interview Answer (Short Form):**
-
-> “Coupling refers to how dependent classes are on each other.  
-> We aim for **low coupling** to make the code flexible, maintainable, and easier to test.”
-
----
-
-## 🧱 **2️⃣ What is Cohesion?**
-
-### 🔹 **Definition:**
-
-**Cohesion** refers to **how closely related and focused the responsibilities of a class or module are.**
-
-- **High cohesion** → Class does one specific task well.
-
-- **Low cohesion** → Class does too many unrelated things.
-
-
----
-
-### ✅ **Example:**
-
-#### ❌ **Low Cohesion**
-
-```
-class Utility {
-    void readFile() {}
-    void connectDatabase() {}
-    void sendEmail() {}
-}
-
-```
-- Unrelated responsibilities all inside one class.
-
-- Hard to maintain or test.
-
-
----
-
-#### ✅ **High Cohesion**
-
-```
-class FileManager {
-    void readFile() {}
-}
-
-class DatabaseManager {
-    void connectDatabase() {}
-}
-
-class EmailService {
-    void sendEmail() {}
-}
-
-```
-- Each class focuses on **one job** → high cohesion.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-# ACCESSMODIFIERS
-
-
-
-#### SUPER AND THIS
-
-
-
-
-
-
-
-
----------------------------------------------------------------------------------------
-
-
-### **25. What is dynamic method dispatch?**
-
-Mechanism by which a call to an overridden method is resolved at runtime.
-
-### **20. What is composition and aggregation?**
-
-- **Aggregation** – “Has-a” relationship, weaker association (object can exist independently).  
-  _Example:_ Department has Employees.
-
-- **Composition** – Strong “Has-a” relationship (object cannot exist without the other).  
-  _Example:_ Human has Heart.
-
-
-### **21. What is coupling and cohesion?**
-
-- **Coupling** – Degree of interdependence between modules. (Low is better)
-
-- **Cohesion** – How closely related the functions within a class are. (High is better)
-
-### **23. What is the difference between shallow copy and deep copy?**
-
-- **Shallow copy** → Copies object reference only.
-
-- **Deep copy** → Copies actual data (creates new instance).
-
-
-|Modifier|Scope|
-|---|---|
-|`private`|Within same class|
-|_default_|Within same package|
-|`protected`|Same package + subclasses|
-|`public`|Everywhere|
-
-
-
-## 🧩 **1️⃣ When would you prefer Composition over Inheritance?**
-
-### 🔹 **Definition Recap:**
-
-- **Inheritance** → “_is-a_” relationship  
-  (e.g., `Dog` _is a_ `Animal`)
-
-- **Composition** → “_has-a_” relationship  
-  (e.g., `Car` _has an_ `Engine`)
-
-
----
-
-### 💡 **Why choose Composition over Inheritance**
-
-|Aspect|Inheritance|Composition|
-|---|---|---|
-|Relationship|“is-a”|“has-a”|
-|Reuse|Reuses behavior by extending a class|Reuses behavior by including an object|
-|Flexibility|Tightly coupled (change in parent affects child)|Loosely coupled (you can swap parts)|
-|Runtime changes|Fixed at compile-time|Can change behavior at runtime|
-|Example|`class Dog extends Animal`|`class Car { Engine engine; }`|
-
-
-
-## 🧠 **2️⃣ What is `instanceof` in Java?**
-
-### 🔹 **Definition:**
-
-`instanceof` is a **keyword** used to test **whether an object is an instance of a specific class or subclass**.
-
-### ✅ **Example:**
-
-```
-class Animal {}
-class Dog extends Animal {}
-
-public class Test {
-    public static void main(String[] args) {
-        Dog d = new Dog();
-
-        System.out.println(d instanceof Dog);     // true
-        System.out.println(d instanceof Animal);  // true
-        System.out.println(d instanceof Object);  // true
-        System.out.println(d instanceof String);  // false
-    }
-}
-
-```
-
-
-## 🧩 **1️⃣ `this` Keyword in Java**
-
-### 🔹 **Definition:**
-
-`this` is a **reference variable** that refers to the **current object** of the class — the object on which the method or constructor was called.
-
-## 🧱 **2️⃣ `super` Keyword in Java**
-
-### 🔹 **Definition:**
-
-`super` is used to **refer to the immediate parent class** (superclass) members — variables, methods, and constructors.
-
-
-
-
-
-
-A **POJO** stands for **Plain Old Java Object**.  
-It’s a simple Java object that **doesn’t depend on any special framework, library, or external restrictions** — just a plain class that represents data or behavior.
-
-
-### 🧠 **Purpose of POJOs**
-
-- To **represent data** (e.g., `User`, `Employee`, `Product`).
-- To keep your **application decoupled** from frameworks.
-- To make code **clean, readable, and testable**.
-
-
-![[Pasted image 20251012222542.png]]
-
---------------------------------------------------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-## 🧠 1. What is an `enum`?
-
-`enum` (short for **enumeration**) is a **special Java type** that represents a **fixed set of constants**.
-
-Think of it as a **type-safe way** to define a group of related values.
-
-For example: directions, days of the week, states, colors, etc.
-
----
-
-### ✅ Example
-
-`public enum Day {     MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }`
-
-- Here, `Day` is an **enum type**.
-
-- `MONDAY, TUESDAY, ...` are the **constants**.
-
-- You cannot create any value outside these constants.
-
-## Features of `enum`
-
-1. **Type-safe**  
-   You cannot assign an invalid value:
-
-   `Day today = "FUNDAY"; // ❌ Compile-time error`
-
-2. **Enum constants are objects**  
-   Each constant is actually an **instance of the enum class**.
-
-3. **Can have fields, constructors, and methods**
-
-
-✅ Every enum constant is a **final, singleton, immutable instance**.
-
-
-![[Pasted image 20251012222621.png]]
-
-
-![[Pasted image 20251012223427.png]]
-
-
-public enum ---> should be always public or default so that can e accessed from diff class
-
-constructor should always be private ----> so that we cannot mannually create obj
-
-Example:
-
-
-```
-enum Color {
-    RED, GREEN, BLUE;
-}
-
-```
-
-
-Internally this is like
-
-
-```
-public final class Color extends Enum<Color> {
-
-    // 1. Public static final objects for each constant
-    public static final Color RED = new Color("RED", 0);
-    public static final Color GREEN = new Color("GREEN", 1);
-    public static final Color BLUE = new Color("BLUE", 2);
-
-    // 2. Private array holding all constants (used by values())
-    private static final Color[] VALUES = { RED, GREEN, BLUE };
-
-    // 3. Private constructor
-    private Color(String name, int ordinal) {
-        super(name, ordinal); // calls Enum constructor
-    }
-
-    // 4. values() method to get all constants
-    public static Color[] values() {
-        return VALUES.clone(); // returns a copy of constants array
-    }
-
-    // 5. valueOf() method to get constant by name
-    public static Color valueOf(String name) {
-        for (Color c : VALUES) {
-            if (c.name().equals(name)) return c;
-        }
-        throw new IllegalArgumentException("No enum constant " + name);
-    }
-}
-
-```
-
-
-Every colour RED , GREEN, BLUE is an instance of Color
-
-Every enum by default will have an ordinal that is value 0,1,2 in the above example
-Java converts this enum into a **final class** that extends `java.lang.Enum`.
-
-![[Pasted image 20251012224659.png]]
-
-
-![[Pasted image 20251012230115.png]]
-
-
-
-
-Enum with Custom Values
-
-```
-public enum EnumSample{  
-
-		MONDAY( 101 ,  "1st day of the week"),  
-		
-		TUESDAY(102 , "2nd day of the week"),  
-		
-		WEDNESDAY(103 , "3rd days of the week"),  
-		
-		THURSDAY(104 , "4th day of the week"),  
-		
-		FRIDAY(105 , "5th day of the week"),  
-		
-		SATURDAY(106 , "its 1st WeekOff"),  
-		
-		SUNDAY(107 , "its 2nd WeekOff");  
-		
-		private int val;  
-		
-		private String comment;  
-		
-		EnumSample(int val, String comment){  
-		
-			this.val  = val;  
-			
-			this.comment = comment;  
-		
-		}  
-		
-		public int getVal(){  
-		
-			return val;  
-		
-		}  
-		
-		public String getComment(){  
-		
-			return Comment;  
-		
-		}  
-		
-		public static EnumSample getEnumFromValue(int Value){  
-			
-			for(EnumSample sample : EnumSample.Values() ){  
-			
-				if(sample.val==value){  
-				
-					return sample;  
-				
-				}  
-			
-			}  
-		
-		return null;  
-		
-		}  
-
-}
-```
-
-
-
-![[Pasted image 20251012230811.png]]
-
-![[Pasted image 20251012230820.png]]
-
-
-✅ Each constant is **still an object of `Operation`**, but internally it may be a **compiler-generated anonymous subclass** if you override methods.
-
-
-
-![[Pasted image 20251012230958.png]]
-
-
-
-
-![[Pasted image 20251012231011.png]]
-
-![[Pasted image 20251012231024.png]]
-
-
-![[Pasted image 20251012231035.png]]
-
-![[Pasted image 20251012231050.png]]
-
-
-![[Pasted image 20251012231138.png]]
-
-
-![[Pasted image 20251012231150.png]]
-
-
-![[Pasted image 20251012231159.png]]
-
-
-
-
-
-## 🧩 2️⃣ The Hidden Constructor Parameters
-
-Every enum constant automatically gets two **hidden parameters**:
-
-|Hidden Field|Description|
-|---|---|
-|`name`|the name of the constant (`"NORTH"`)|
-|`ordinal`|the order in which it’s declared (0 for first, 1 for second, etc.)|
-
-So when the compiler creates:
-
-`Direction.NORTH`
-
-It actually becomes:
-
-`new Direction("NORTH", 0);`
-
----
-
-## 🧠 3️⃣ What If You Add Your Own Constructor?
-
-When you do this:
-
-```
-public enum Direction {
-    NORTH("Up"), SOUTH("Down");
-    private final String desc;
-
-    Direction(String desc) { this.desc = desc; }
-}
-
-```
-
-Then **your constructor** is added _on top of_ the hidden one.  
-But Java still calls `super(name, ordinal)` internally before your constructor runs.
-
-So effectively:
-
-```
-private Direction(String name, int ordinal, String desc) {
-    super(name, ordinal);
-    this.desc = desc;
-}
-
-```
----
-
-## 🔍 4️⃣ You Can’t Call the Constructor Yourself
-
-Because:
-
-- Enum constructors are **always private** (or package-private).
-
-- You can’t do `new Direction()` — only the JVM creates them.
-
-- The compiler instantiates them exactly once at class loading time.
-
-
-That’s why all enum instances are **singletons**.
-
-
+- ✅ Preferred modern approach
 
 -------------------------------------------------------------------------------------
 
 
-## 🧩 1️⃣ `System.out.println(d)` Calls `toString()`
 
-When you print any object in Java:
 
-`System.out.println(d);`
+   
 
-it actually calls:
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1s9eab2fc2ddd04d4694aab8a2f4841ef4)
 
-`System.out.println(d.toString());`
+- ✅ Serialization-safe
+
+- ✅ Thread-safe by default
+
+- ✅ Cannot be broken by reflection
+
+--------------------------------------------------------------------------------
+
+## **1️⃣ The Problem With Reflection in Normal Singletons**
+
+For a normal singleton:
+```
+public class EagerSingleton {
+    private static final EagerSingleton INSTANCE = new EagerSingleton();
+    private EagerSingleton() { }
+    public static EagerSingleton getInstance() { return INSTANCE; }
+}
+
+```
+
+- The constructor is **private**, so normally you cannot create a new instance.
+
+- **Reflection** can bypass it:
+
+
+```
+`Constructor<EagerSingleton> cons = EagerSingleton.class.getDeclaredConstructor();
+cons.setAccessible(true);  // bypass private
+EagerSingleton obj = cons.newInstance(); // Creates a new instance!
+
+```
+
+✅ This **breaks singleton guarantee**.
 
 ---
 
-## ⚙️ 2️⃣ `Enum` Class Defines `toString()`
+## **2️⃣ Why Enum is Safe from Reflection**
 
-All enums implicitly extend `java.lang.Enum`, and that class defines:
+Consider:
 
-`public abstract class Enum<E extends Enum<E>> implements Comparable<E>, Serializable {     private final String name;     private final int ordinal;      public final String name() {         return name;     }      public String toString() {         return name;     } }`
+`public enum SingletonEnum {     INSTANCE; }`
 
-So by default,  
-👉 `toString()` just returns the `name` of the enum constant — which is `"NORTH"`, `"SOUTH"`, etc.
+- Enum constructors are **implicitly private**.
+
+- More importantly, **the JVM enforces special rules for enum instantiation**.
+
+
+### **Rules enforced by JVM:**
+
+1. **Cannot call enum constructors reflectively.**
+
+    - If you try:
+
+```
+Constructor<SingletonEnum> cons = SingletonEnum.class.getDeclaredConstructor();
+cons.setAccessible(true);
+SingletonEnum obj = cons.newInstance(); // Throws exception!
+
+```
+
+- JVM throws:
+
+
+`java.lang.IllegalArgumentException: Cannot reflectively create enum objects`
+
+2. **Why JVM does this:**
+
+    - The **`java.lang.Enum` class constructor** checks internally if the class being instantiated is an enum.
+
+    - If it is, **it prevents reflective instantiation**.
+
+    - This is hardcoded in **JVM and `Enum` class**.
+
+-------------------------------------------------------------------------------------------
+
+## What is an Immutable Class?
+
+An **immutable class** is a class whose **state cannot be changed once it’s created**.
+
+- Once an object of an immutable class is created, its **fields cannot be modified**.
+
+- Any modification-like operation creates a **new object**.
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1s84157ef2ed954169b4cd8b050289266a)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1s9df8524dbe564521816246781a756bbf)
+
+
+
+   
+
+![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s340edd3a883b4ef7ac90874731c865b0/resources/u3i1s8bcadab57dfe4c52b08edde230ce5b59)
+
+
+
+## 1️⃣ `final` reference to a mutable list
+
+`final List<String> list = new ArrayList<>(); list.add("Hello"); // ✅ allowed list.add("World"); // ✅ allowed`
+
+- `final` **prevents reassigning the reference**:
+
+
+`list = new ArrayList<>(); // ❌ compilation error`
+
+- But the **object itself is mutable**, so you **can add, remove, or modify elements**.
+
+
+✅ So here, you **can add extra data**.
 
 ---
 
-## ✅ 3️⃣ So These Are Equivalent
+## 2️⃣ Immutable list (cannot add/remove)
 
-`System.out.println(d);          // Calls toString() → "NORTH" System.out.println(d.toString()); // Same → "NORTH" System.out.println(d.name());     // Same → "NORTH"`
+### Using `Collections.unmodifiableList`:
 
-All three print the same thing **by default**.
+`List<String> list = new ArrayList<>(); List<String> immutableList = Collections.unmodifiableList(list);  immutableList.add("Hello"); // ❌ throws UnsupportedOperationException`
+
+### Using Java 9+ `List.of()`:
+
+`List<String> immutableList = List.of("A", "B", "C"); immutableList.add("D"); // ❌ throws UnsupportedOperationException`
+
+- Here, the **object itself is immutable**, so you **cannot add or remove elements**, regardless of whether the reference is `final` or not.
+- ------------------------------------------------------------------------------
+
+# ✅ **1. What is an Unmodifiable List?**
+
+It’s **NOT** a new list.
+
+It is a **wrapper** around an existing list that:
+
+- Allows reading (get, size, contains)
+
+- **Blocks ALL modifications** (add, remove, clear)
+
+- Throws **UnsupportedOperationException** for any modifying operation
+
 
 ---
 
-## ⚙️ 4️⃣ You Can Override `toString()` If You Want Custom Output
+# 🔍 **2. How is it implemented internally?**
+
+Inside Java, there is a class like this:
+```
+static class UnmodifiableList<E> implements List<E> {
+    final List<? extends E> list;
+
+    UnmodifiableList(List<? extends E> list) {
+        this.list = Objects.requireNonNull(list);
+    }
+}
+
+```
+
+### ✔ It stores the original list inside
+
+### ✔ It does NOT copy the list
+
+### ✔ It delegates read operations
+
+### ✔ It throws exceptions for write operations
+
+---
+
+# 🧠 **3. How each method works internally**
+
+### **Read methods → delegated**
+
+```
+public E get(int index) {
+    return list.get(index);   // delegate to original list
+}
+
+public int size() {
+    return list.size();
+}
+
+```
+
+### **Write methods → blocked**
+
+```
+public void add(int index, E element) {
+    throw new UnsupportedOperationException();
+}
+
+public boolean add(E e) {
+    throw new UnsupportedOperationException();
+}
+
+public E remove(int index) {
+    throw new UnsupportedOperationException();
+}
+
+public void clear() {
+    throw new UnsupportedOperationException();
+}
+
+```
+
+This applies to:
+
+- add()
+
+- addAll()
+
+- remove()
+
+- removeAll()
+
+- retainAll()
+
+- set()
+
+- sort()
+
+- replaceAll()
+
+
+All modifying operations **just throw exceptions.**
+
+
+
+---------------------------------------------------------------------------------------------
+
+
+## Wrapper Class
+
+
+A **Wrapper class** is an object-version of a primitive data type.
+
+Java has 8 primitive types, and each has a corresponding wrapper class:
+
+|Primitive|Wrapper Class|
+|---|---|
+|`int`|`Integer`|
+|`long`|`Long`|
+|`short`|`Short`|
+|`byte`|`Byte`|
+|`float`|`Float`|
+|`double`|`Double`|
+|`char`|`Character`|
+|`boolean`|`Boolean`|
+
+A wrapper **wraps** the primitive value inside an **object**.
+
+
+# ✅ 1. **Why Wrapper Classes Exist**
+
+### **Reason 1 — Objects are needed in many Java APIs**
+
+Java Collections (ArrayList, HashMap, etc.) **cannot store primitives**.
+
+`List<int> list = new ArrayList<>();  // ❌ Not allowed List<Integer> list = new ArrayList<>(); // ✔ Works`
+
+Because collections only store **Objects**, not primitive values.
+
+---
+
+### **Reason 2 — Wrappers provide utility methods**
 
 Example:
-```
-public enum Direction {
-    NORTH("Upwards"), SOUTH("Downwards"), EAST("Rightwards"), WEST("Leftwards");
 
-    private final String desc;
+`int x = Integer.parseInt("10"); boolean b = Boolean.parseBoolean("true");`
 
-    Direction(String desc) {
-        this.desc = desc;
-    }
+Primitives cannot do this; wrappers add **extra functionality**.
 
-    @Override
-    public String toString() {
-        return desc;
-    }
-}
+---
 
-```
+### **Reason 3 — Needed for Reflection & Generics**
+
+Reflection, annotations, and generics expect objects.
+
+`Method m = obj.getClass().getMethod("test", Integer.class);`
+
+You cannot pass primitive types directly in reflection metadata.
+
+---
+
+### **Reason 4 — Null support**
+
+Primitives cannot be `null`.
+
+`int a = null;  // ❌ ERROR Integer a = null; // ✔ Valid`
+
+In databases, JSON, REST APIs → fields may be null → wrapper required.
+
+---
+
+### **Reason 5 — Object features: Comparable, serialization**
+
+Primitives cannot:
+
+- be serialized
+
+- compared using `.equals()`
+
+- passed in generics
+
+- stored in collections
+
+- used in streams API
 
 
-Now:
+Wrapper classes make primitives “object-friendly.”
 
-`System.out.println(Direction.NORTH); // Upwards System.out.println(Direction.NORTH.name()); // NORTH System.out.println(Direction.NORTH.toString()); // Upwards`
 
-✅ You can see the difference now:
 
-- `.name()` → always gives the exact identifier name (`"NORTH"`)
+# ✅ **Why Collections Do NOT Support Primitives**
 
-- `.toString()` → can be customized (default = same as `name()`)
+The **root cause**:  
+👉 **Java Generics work only with Objects** — not primitives.
+
+Collections like:
+
+- `List<T>`
+
+- `Set<T>`
+
+- `Map<K, V>`
+
+
+are all implemented using **Generics**.
+
+
+
+
+# ✅ **Why must Generic type parameter `T` be a reference type?**
+
+(i.e., why `T` cannot be `int`, `double`, etc.)
+
+---
+
+# #1️⃣ **Because of How Generics Are Implemented — TYPE ERASURE**
+
+Java generics exist only at **compile time**, not at runtime.
+
+Example:
+
+`List<Integer> list = new ArrayList<>();`
+
+After compilation (bytecode), this becomes:
+
+`List list = new ArrayList();  // T → Object`
+
+➡ **All generics collapse to `Object` at runtime.**
+
+---
+
+### ❗ Now imagine:
+
+If Java allowed:
+
+`List<int> list;`
+
+After type erasure this becomes:
+
+`List list; // internally stores Object[]`
+
+But `int` **cannot be stored in Object[]** because:
+
+- `int` is not an `Object`
+
+- primitives cannot be cast to Object
+
+- primitives have no reference identity
+
+
+So **type erasure makes it impossible for generics to work with primitives.**
+
+👉 **This is the REAL root cause.**
+
+
+
+
+
+# 🧠 **Autoboxing & Unboxing (Very Important)**
+
+Java automatically converts:
+
+### Primitive → Wrapper (Autoboxing)
+
+`int x = 5; Integer y = x; // autoboxing`
+
+### Wrapper → Primitive (Unboxing)
+
+`Integer n = 10; int m = n; // unboxing`
+
 
 
 ---
 
-## 🧠 5️⃣ Internal Flow (When You Call `valueOf()` and Print)
+# ✅ **📌 Full Important Implementation of `Integer` (Explained Line by Line)**
 
-Here’s what happens line-by-line:
+---
 
-`Direction d = Direction.valueOf("NORTH");`
+# 🧩 **Class Declaration**
 
-1. The compiler calls the auto-generated static method:
+`public final class Integer extends Number implements Comparable<Integer> {`
+
+### ✔ `final`
+
+Cannot be subclassed → ensures immutability.
+
+### ✔ `extends Number`
+
+Allows converting to:
+
+- `int`
+
+- `double`
+
+- `float`
+
+- `long`
+
+
+### ✔ `implements Comparable<Integer>`
+
+Allows sorting, comparing integers.
+
+---
+
+# 🧩 **Internal Field**
+
+`private final int value;`
+
+### ✔ `final`
+
+Value cannot be changed → Immutable.
+
+---
+
+# 🧩 **Constructor** (Not recommended)
+
+`public Integer(int value) {     this.value = value; }`
+
+This **always creates a new object** → does NOT use cache.
+
+Better: use `Integer.valueOf()`.
+
+---
+
+# 🧩 **valueOf() — MOST IMPORTANT (Caching)**
 
 ```
-    public static Direction valueOf(String name) {
-    return Enum.valueOf(Direction.class, name);
+public static Integer valueOf(int i) {
+    if (i >= IntegerCache.low && i <= IntegerCache.high) {
+        return IntegerCache.cache[i + (-IntegerCache.low)];
+    }
+    return new Integer(i);
 }
 
 ```
 
-2. `Enum.valueOf()` looks up `"NORTH"` in the internal constant map.
+### ⭐ What it does:
 
-3. It returns the same singleton instance `Direction.NORTH`.
+1. If integer is inside cache range (-128 to +127):
 
-4. When you print `d`, it calls `toString()` → `"NORTH"`.
+    - returns _pre-created_ object → fast!
 
+2. Else:
 
-
-
-
-----------------------------------------------------------------------------------------
+    - creates a new Integer object.
 
 
-## 🚨 **19. What happens if you clone an Enum?**
+### Why?
 
-You **can’t clone** an enum.  
-The `clone()` method is overridden in `Enum` to throw `CloneNotSupportedException`.
+Performance + memory optimization.
 
+---
 
-🧭 16. Can Enums be used in collections like HashMap or Set? Yes — and very efficiently. Because enum constants are immutable and have a fast hashCode
+# 🧩 **Integer Cache (Static Inner Class)**
 
 ```
-enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY }
+private static class IntegerCache {
+    static final int low = -128;
+    static final int high = 127;
+    static final Integer[] cache = new Integer[(high - low) + 1];
 
-public class EnumMapExample {
-    public static void main(String[] args) {
-        EnumMap<Day, String> schedule = new EnumMap<>(Day.class);
-
-        schedule.put(Day.MONDAY, "Start strong");
-        schedule.put(Day.FRIDAY, "Finish work");
-
-        for (Day d : schedule.keySet()) {
-            System.out.println(d + " → " + schedule.get(d));
+    static {
+        for (int i = low; i <= high; i++) {
+            cache[i - low] = new Integer(i);
         }
     }
 }
 
 ```
 
+### 🔥 What happens here:
+
+- JVM pre-creates 256 Integer objects (`-128` to `+127`)
+
+- Stored inside `cache[]`
+
+- Used when you call `Integer.valueOf()`
 
 
+---
+
+# 🧩 **equals() Implementation**
+
+```
+public boolean equals(Object obj) {
+    if (obj instanceof Integer) {
+        return value == ((Integer) obj).intValue();
+    }
+    return false;
+}
+
+```
+
+### ✔ Logic:
+
+- Checks if the other object is Integer
+
+- Compares primitive values
+
+- Avoids reference comparison
+
+
+---
+
+# 🧩 **hashCode()**
+
+`public int hashCode() {     return value; }`
+
+### ✔ Why?
+
+Hash of an Integer should be the integer itself.
+
+---
+
+# 🧩 **compareTo()**
+
+```
+public int compareTo(Integer anotherInteger) {
+    return compare(this.value, anotherInteger.value);
+}
+
+public static int compare(int x, int y) {
+    return (x < y) ? -1 : (x == y ? 0 : 1);
+}
+
+```
+### ✔ Used for sorting, TreeSet, TreeMap
+
+---
+
+# 🧩 **toString()**
+
+`public String toString() {     return Integer.toString(value); }`
+
+---
+
+# 🧩 **Static parseInt()**
+
+```
+public static int parseInt(String s) throws NumberFormatException {
+    return parseInt(s, 10);
+}
+
+```
+---
+
+# 🧩 **Static parseInt(String, int radix)**
+
+
+```
+public static int parseInt(String s, int radix) throws NumberFormatException {
+    if (s == null) throw new NumberFormatException("null");
+
+    int result = 0;
+    boolean negative = false;
+    int i = 0, len = s.length();
+    int limit = -Integer.MAX_VALUE;
+
+    char firstChar = s.charAt(0);
+    if (firstChar == '-') {
+        negative = true;
+        limit = Integer.MIN_VALUE;
+        i++;
+    }
+
+    while (i < len) {
+        int digit = Character.digit(s.charAt(i++), radix);
+        if (digit < 0) throw new NumberFormatException();
+        result = result * radix - digit;
+    }
+
+    return negative ? result : -result;
+}
+
+```
+### ✔ How it works:
+
+- Manually converts each char to a digit
+
+- Builds integer through multiplication
+
+- Uses a negative accumulator to avoid overflow
+
+- Throws `NumberFormatException` for invalid characters
+
+
+This is **faster** than regex-based parsing.
+
+---
+
+# 🧩 **intValue(), longValue(), doubleValue(), floatValue()**
+
+(from Number class)
+
+```
+public int intValue() {
+    return value;
+}
+
+public long longValue() {
+    return (long) value;
+}
+
+public float floatValue() {
+    return (float) value;
+}
+
+public double doubleValue() {
+    return (double) value;
+}
+
+```
+
+### ✔ Purpose:
+
+Cast integer wrapper to other primitive types.
+
+---
+
+---
+
+# 🧩 **decode() — converts string to Integer**
+
+```
+public static Integer decode(String nm) {
+    int radix = 10;
+    int index = 0;
+    boolean negative = false;
+
+    if (nm.startsWith("-")) {
+        negative = true;
+        index++;
+    }
+
+    if (nm.startsWith("0x", index) || nm.startsWith("0X", index)) {
+        radix = 16;
+        index += 2;
+    } else if (nm.startsWith("#", index)) {
+        radix = 16;
+        index++;
+    } else if (nm.startsWith("0", index) && nm.length() > 1) {
+        radix = 8;
+    }
+
+    return Integer.valueOf(parseInt(nm.substring(index), radix) * (negative ? -1 : 1));
+}
+
+```
+
+### ✔ Supports:
+
+- Decimal
+
+- Hex (`0x10`, `#10`)
+
+- Octal (`010`)
 
 
 
@@ -1388,515 +888,380 @@ public class EnumMapExample {
 
 
 
-# 🧭 ENUM USAGE IN SPRING BOOT
+# ✅ **1. Using `Integer.valueOf(int)` → BEST (recommended)**
+
+`Integer a = Integer.valueOf(10);`
+
+### ✔ Uses **Integer Cache**
+
+### ✔ Does NOT create new object for values -128 to +127
+
+### ✔ Fastest and most memory-efficient
+
+### ✔ Used by autoboxing internally
 
 ---
 
-## 1️⃣ **Representing Fixed States or Roles**
+# ✅ **2. Using Autoboxing → (actually becomes valueOf internally)**
 
-Enums are perfect for defining **constants** like:
+`Integer b = 10;  // Autoboxing`
 
-- Order statuses
+Compiler converts this to:
 
-- User roles
+`Integer b = Integer.valueOf(10);`
 
-- Payment methods
+### ✔ Same as valueOf
 
-- Error codes
+### ✔ Uses caching
 
-
-### Example – User Roles
-
-`public enum Role {     ADMIN,     USER,     GUEST }`
-
-### Usage in Entity:
-
-```
-@Entity
-public class User {
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    private String name;
-
-    @Enumerated(EnumType.STRING)  // Important: store name, not ordinal
-    private Role role;
-}
-
-```
-
-👉 Why `EnumType.STRING`?
-
-- `EnumType.ORDINAL` saves numbers (0,1,2...) — breaks if order changes.
-
-- `EnumType.STRING` saves actual names ("ADMIN", "USER") — safer and readable.
-
+### ✔ Most used in real-world code
 
 ---
 
-## 2️⃣ **Mapping Enum in JPA / Hibernate**
+# ❗ **3. Using `new Integer(int)` → Worst (creates new object every time)**
 
-### Example – Order Status
+`Integer c = new Integer(10);`
 
-`public enum OrderStatus {     NEW,     PROCESSING,     COMPLETED,     CANCELLED }`
+### ❌ Does NOT use caching
 
-### Entity:
+### ❌ Always allocates new object
 
-```
-@Entity
-public class Order {
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    @Enumerated(EnumType.STRING)
-    private OrderStatus status;
-}
-
-```
-
-### Repository:
-```
-@Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
-    List<Order> findByStatus(OrderStatus status);
-}
-
-```
-
-
-### Usage:
-
-`List<Order> completed = orderRepository.findByStatus(OrderStatus.COMPLETED);`
-
-✅ Type-safe  
-✅ No magic strings  
-✅ IDE autocompletion
+### ❌ Deprecated after Java 9
 
 ---
 
-## 3️⃣ **Enums in REST APIs**
+# ❗ **4. Using `new Integer(String)` → Also always creates new object**
 
-### Controller Example
+`Integer d = new Integer("10");`
 
-```
-@RestController
-@RequestMapping("/orders")
-public class OrderController {
+### ❌ Slow
 
-    @GetMapping("/status/{status}")
-    public String getOrdersByStatus(@PathVariable OrderStatus status) {
-        return "Orders with status: " + status;
-    }
-}
+### ❌ Parses string
 
-```
-
-If you hit:
-
-`GET /orders/status/COMPLETED`
-
-You’ll get:
-
-`Orders with status: COMPLETED`
-
-🧠 Spring automatically converts the path variable `"COMPLETED"` to the enum constant `OrderStatus.COMPLETED`.
+### ❌ Does NOT use cache
 
 ---
 
-## 4️⃣ **Enums in Request Body (JSON)**
+# ⚡ **5. Using `Integer.parseInt()` → returns primitive int, NOT Integer**
 
-### Example DTO
+`int e = Integer.parseInt("10");`
 
-```
-`public class PaymentRequest {
-    private PaymentType type;
-    private double amount;
-}
+If you want Integer:
 
-public enum PaymentType {
-    CREDIT_CARD, DEBIT_CARD, UPI
-}
+`Integer e2 = Integer.valueOf(Integer.parseInt("10"));`
 
-```
+---
 
-### Controller
+# ⚡ **6. Using `Integer.decode(String)`**
 
-```
-@PostMapping("/pay")
-public String pay(@RequestBody PaymentRequest request) {
-    return "Paid using " + request.getType();
-}
+`Integer f = Integer.decode("10");     // decimal Integer g = Integer.decode("0x10");   // hex Integer h = Integer.decode("010");    // octal`
 
-```
+### ✔ Supports hex, oct, decimal
 
-### Request JSON:
+### ✔ Uses valueOf internally → uses cache
 
-`{   "type": "UPI",   "amount": 1500 }`
+---
 
-✅ Automatically converted from JSON string `"UPI"` → `PaymentType.UPI`.
+# ⚡ **7. Using `Integer.valueOf(String)`**
+
+`Integer i = Integer.valueOf("10");`
+
+### ✔ Parses then uses cache
+
+Equivalent to:
+
+`Integer i = Integer.valueOf(Integer.parseInt("10"));`
 
 
+# ✅ **3. Wrapper Class Immutability**
+
+All wrapper objects are **immutable** (value cannot change).
+
+Why?
+
+- Thread-safe
+
+- Supports caching
+
+- Behavior similar to String
 
 
+Learn:
 
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s4827bbe7774a43579219656353f13fa0)
+- How immutability affects comparison
 
-## **What is an Interface in Java?**
-
-An **interface** in Java is a **contract** or **blueprint** that defines **what methods a class must implement**, **but not how**.
-It contains **abstract methods** (and optionally default or static methods) that a class **agrees to implement**.
-
-
-1️⃣ **Abstraction** – Hides implementation details, shows only method definitions.  
-2️⃣ **Loose Coupling** – Depends on interface, not concrete class (easy to switch implementations).  
-3️⃣ **Polymorphism** – One interface type can refer to many implementing objects.  
-4️⃣ **Multiple Inheritance (of Type)** – A class can implement multiple interfaces.  
-5️⃣ **Code Reusability** – Common behavior defined once, reused across classes.
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s9d101d410a254b7c85893012a6b1f25b)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s5ca28c5e0c2f44f192b03d21c88198c3)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s2927fcff047b408b889eb77a2c11db34)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s7b4fc48aff334affb137ab806b40bfd1)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s97a59e6ec9ad4d60b7e0ab59a2f568e4)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sec481a0c1e8644958fd185a584bc08a8)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s0fa95af59ea245aba9543c5030515605)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sf8f1100cf1f34c4795b894ea18b95559)
-
-## 💡 **1️⃣ Class Level**
-
-|Feature|Interface|Abstract Class|
-|---|---|---|
-|**Access Modifier Allowed**|Only `public` or **package-private** (default)|`public`, `protected`, or **package-private**|
-|**Can be declared `final`?**|❌ No (cannot be instantiated or final)|❌ No (must be extendable)|
-|**Can be declared `abstract`?**|Implicitly abstract (no need to mention)|Must explicitly use `abstract` keyword|
-
-
-
+- How immutability avoids bugs
 
 
 ---
 
-## 💡 **2️⃣ Methods**
+# ✅ **4. Wrapper Class Caching (Very Important)**
 
-|Feature|Interface|Abstract Class|
-|---|---|---|
-|**Access Modifier (Abstract method)**|Always `public` (implicitly)|Can be `public`, `protected`, or package-private|
-|**Default methods (Java 8+)**|Must be `public`|N/A|
-|**Static methods (Java 8+)**|Must be `public`|Any modifier (`public`, `protected`, `private`)|
-|**Private methods (Java 9+)**|✅ Allowed (only for reuse inside interface)|✅ Allowed|
-|**Final methods**|❌ Not allowed|✅ Allowed|
-|**Abstract methods count**|All methods are abstract by default (unless default/static)|Some can be abstract, others concrete|
+Only for:
 
-{ } }`
+- `Integer`
 
----
+- `Byte`
 
-## 💡 **3️⃣ Fields (Variables)**
+- `Short`
 
-|Feature|Interface|Abstract Class|
-|---|---|---|
-|**Access Modifier**|Always `public static final` (constants)|Can be any (`private`, `protected`, `public`)|
-|**Value Requirement**|Must be initialized at declaration|Optional (can be uninitialized)|
-|**Mutable?**|❌ No (since `final`)|✅ Yes (if not final)|
+- `Long`
 
+- `Character` (0–127)
 
----
 
-## ⚙️ **4️⃣ Object Rules**
+### **Integer Cache Range**
 
-|Feature|Interface|Abstract Class|
-|---|---|---|
-|**Instantiation**|❌ Not possible|❌ Not possible|
-|**Implements / Extends**|Implemented by a class (`implements`)|Extended by a class (`extends`)|
-|**Multiple inheritance**|✅ Allowed (class can implement many interfaces)|❌ Not allowed (only one abstract class)|
-|**Constructors**|❌ Not allowed|✅ Allowed|
+`-128 to 127`
 
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s5f432b40f7384cba9c4275dcaea980d5)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sbd9d9920d5dd4c0a96394da9db6e714e)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sbd24d9357e82480c88d436fa9f59a65d)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s499a64163acf4110a7c1cd4b92ceddcf)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s0e24e3cd96664f70878fead57d696f44)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s816c34f42b6b4f28824eceab2f9e9f22)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sdea5359b5afd494fa2c3e78d5e741dd7)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s1c64acf972404b25a45ae140571e54bc)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s2fec6579be394f3eaeca827b4a7307d2)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s802868e154e5498e8b976457816ac471)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1s43194d01407745c98b634177efe77b14)
-
-
-
-   
-
-![](https://notebook.zohopublic.in/api/v1/public/notecards/u3i1s033d318172e442b8b8f242767b93776c/resources/u3i1sbbc6d666a3c5445096ca62729ee684a5)
-
-
-
-
-## **1️⃣ Can abstract classes have constructors?**
-
-✅ **Yes**, abstract classes **can have constructors**.
-
-`abstract class Vehicle {     Vehicle() {         System.out.println("Vehicle constructor called");     }     abstract void start(); }`
-
-- You **can define constructors** in an abstract class.
-
-- The constructor **runs when a subclass object is created**, not for the abstract class itself.
-
-
----
-
-## **2️⃣ Why can’t you create an object of an abstract class?**
-
-- Abstract classes are **incomplete** — they may have **abstract methods with no body**.
-
-- If Java allowed `new Vehicle()`, there would be **no implementation for `start()`**, so what would the JVM run?
-
-- **Cannot instantiate something that is incomplete**.
-
-
-`Vehicle v = new Vehicle(); // ❌ Compilation Error`
-
----
-
-## **3️⃣ Then what’s the purpose of a constructor in an abstract class?**
-
-- **To initialize fields and run code** when a **subclass object** is created.
 
 ```
-class Car extends Vehicle {
-    Car() {
-        super(); // Calls Vehicle constructor
-        System.out.println("Car constructor called");
-    }
-    void start() {
-        System.out.println("Car started");
-    }
-}
+Integer a = 100;
+Integer b = 100;
+a == b → true  
 
-public class Test {
-    public static void main(String[] args) {
-        Vehicle v = new Car();
-        // Output:
-        // Vehicle constructor called
-        // Car constructor called
-    }
-}
+Integer x = 200;
+Integer y = 200;
+x == y → false
 
 ```
 
 
-✅ Notice: `Vehicle()` runs **through the subclass**, never directly.
-
-
-
-![[Pasted image 20251015110826.png]]
-
-
-
-![[Pasted image 20251015110844.png]]
-
-
-A nested class can have private but a top level class can be public or default only.
-Private means it is acessible within a class if u declare a class as private u say that class is
-private to what? it looks meaningless
-
-Similarly for static also
-
-
-Making a constructor `final` is meaningless because **constructors cannot be overridden**, so the compiler forbids it.
-
-- **`static`** means: _belongs to the class, not an instance_.
-- **Constructors are used to create instances**.
-- If you made a constructor `static`, it would exist **without an instance**, which **contradicts its purpose**.
-
-
-
-| Feature         | public | protected | default | private | final | static | abstract |
-| --------------- | ------ | --------- | ------- | ------- | ----- | ------ | -------- |
-| Top-level class | ✅      | ❌         | ✅       | ❌       | ✅     | ❌      | ❌        |
-| Concrete method | ✅      | ✅         | ✅       | ✅       | ✅     | ✅      | ❌        |
-| Constructor     | ✅      | ✅         | ✅       | ✅       | ❌     | ❌      | ❌        |
--- A **private method** is visible **only within the class it is declared**.
-- Subclasses **cannot see it**, so they **cannot override it**.
------------------------------------------------------------------------------------------------------
-
-An **abstract class** in Java is a **class that cannot be instantiated directly** and is intended to serve as a **base class for other classes**. It can contain **abstract methods (without a body) and concrete methods (with a body)**.
-
-![[Pasted image 20251015112449.png]]
-An **abstract class can exist without any abstract methods**.
-
-| Feature        | public | protected | default | private           | final             | static                    | abstract                      |
-| -------------- | ------ | --------- | ------- | ----------------- | ----------------- | ------------------------- | ----------------------------- |
-| Abstract class | ✅      | ❌         | ✅       | ❌                 | ❌                 | ❌ (top-level), ✅ (nested) | ✅                             |
-| Method         | ✅      | ✅         | ✅       | ✅ (concrete only) | ✅ (concrete only) | ✅ (concrete only)         | ✅ (must override in subclass) |
-| Constructor    | ✅      | ✅         | ✅       | ✅                 | ❌                 | ❌                         | ❌                             |
-
-
-![[Pasted image 20251015112519.png]]
-![[Pasted image 20251015112540.png]]
-
-------------------------------------------------------------------------------------------
-
-
-![[Pasted image 20251015115152.png]]
-
-
-![[Pasted image 20251015115213.png]]
 
 
 ----------------------------------------------------------------------------------
 
+# 🔹 1️⃣ Parsing & Conversion Methods (MOST IMPORTANT)
+
+### `parseInt()`
+
+`int x = Integer.parseInt("123");`
+
+- Converts `String` → primitive `int`
+
+- Throws `NumberFormatException` if invalid
 
 
+`Integer.parseInt("101", 2); // binary → decimal (5)`
 
-![[Pasted image 20251015120925.png]]
+---
 
-![[Pasted image 20251015121000.png]]
+### `valueOf()`
 
+`Integer x = Integer.valueOf("123");`
 
+- Returns an `Integer` object
 
-![[Pasted image 20251015121022.png]]
-
-
-
-![[Pasted image 20251015121042.png]]
-
+- Uses **Integer cache (-128 to 127)**
 
 
-![[Pasted image 20251015121100.png]]
+📌 Preferred over `new Integer()`
 
-![[Pasted image 20251015121119.png]]
+---
 
+### `decode()`
 
+`Integer x = Integer.decode("0x10"); // 16`
 
+Supports:
 
-![[Pasted image 20251015121150.png]]
+- Decimal
 
+- Hex (`0x`)
 
-
-![[Pasted image 20251015121206.png]]
-
-
-
-![[Pasted image 20251015121227.png]]
-
+- Octal (`0`)
 
 
-![[Pasted image 20251015121247.png]]
+---
+
+# 🔹 2️⃣ Comparison Methods
+
+### `compare(int x, int y)`
+
+`Integer.compare(10, 20); // -1`
+
+Used in:
+
+`stream.max(Integer::compare)`
+
+---
+
+### `compareUnsigned(int x, int y)`
+
+`Integer.compareUnsigned(-1, 1); // > 0`
+
+Treats ints as **unsigned**
+
+---
+
+# 🔹 3️⃣ Math / Utility Methods
+
+### `sum(int a, int b)`
+
+`Integer.sum(10, 20); // 30`
+
+---
+
+### `max(int a, int b)`
+
+`Integer.max(10, 20); // 20`
+
+---
+
+### `min(int a, int b)`
+
+`Integer.min(10, 20); // 10`
+
+📌 Used in `reduce()` operations
+
+---
+
+# 🔹 4️⃣ Bit Manipulation Methods (INTERVIEW FAVORITE 🔥)
+
+### `bitCount(int i)`
+
+`Integer.bitCount(7); // 3 (111)`
+
+---
+
+### `highestOneBit(int i)`
+
+`Integer.highestOneBit(10); // 8`
+
+---
+
+### `lowestOneBit(int i)`
+
+`Integer.lowestOneBit(10); // 2`
+
+---
+
+### `numberOfLeadingZeros(int i)`
+
+`Integer.numberOfLeadingZeros(1); // 31`
+
+---
+
+### `numberOfTrailingZeros(int i)`
+
+`Integer.numberOfTrailingZeros(8); // 3`
+
+---
+
+### `rotateLeft(int i, int distance)`
+
+`Integer.rotateLeft(1, 1); // 2`
+
+---
+
+### `rotateRight(int i, int distance)`
+
+`Integer.rotateRight(2, 1); // 1`
+
+---
+
+### `reverse(int i)`
+
+`Integer.reverse(2);`
+
+---
+
+### `reverseBytes(int i)`
+
+`Integer.reverseBytes(0x12345678);`
+
+---
+
+### `signum(int i)`
+
+`Integer.signum(-5); // -1`
+
+---
+
+# 🔹 5️⃣ String Representation Methods
+
+### `toString(int i)`
+
+`Integer.toString(10); // "10"`
+
+---
+
+### `toBinaryString(int i)`
+
+`Integer.toBinaryString(10); // "1010"`
+
+---
+
+### `toHexString(int i)`
+
+`Integer.toHexString(255); // "ff"`
+
+---
+
+### `toOctalString(int i)`
+
+`Integer.toOctalString(8); // "10"`
+
+---
+
+# 🔹 6️⃣ Unsigned Operations (Advanced)
+
+### `toUnsignedLong(int i)`
+
+`long x = Integer.toUnsignedLong(-1);`
+
+---
+
+### `divideUnsigned(int dividend, int divisor)`
+
+`Integer.divideUnsigned(-1, 2);`
+
+---
+
+### `remainderUnsigned(int dividend, int divisor)`
+
+`Integer.remainderUnsigned(-1, 2);`
+
+---
+
+# 🔹 7️⃣ Constants
+
+`Integer.MAX_VALUE Integer.MIN_VALUE Integer.SIZE        // 32 bits Integer.BYTES       // 4 bytes`
+
+---
+
+# 🧠 Interview Cheat Sheet (IMPORTANT)
+
+### MOST USED
+
+- `parseInt()`
+
+- `valueOf()`
+
+- `compare()`
+
+- `sum()`
+
+- `max()`
+
+- `min()`
 
 
-![[Pasted image 20251015121315.png]]
+### STREAM / FUNCTIONAL
+
+- `sum`
+
+- `max`
+
+- `min`
+
+- `compare`
 
 
--------------------------------------------------------------------------------------
+### BIT LEVEL
 
-|Class Type|public|protected|default|private|final|static|abstract|Notes|
-|---|---|---|---|---|---|---|---|---|
-|Top-level concrete|✅|❌|✅|❌|✅|❌|❌|Only public or package-private|
-|Top-level abstract|✅|❌|✅|❌|❌|❌|✅|Cannot be final, static top-level not allowed|
-|Nested concrete|✅|✅|✅|✅|✅|✅|❌|Can be private, static allowed|
-|Nested abstract|✅|✅|✅|✅|❌|✅|✅|Can be private/protected/public; static allowed|
+- `bitCount`
 
+- `highestOneBit`
 
-|Method Type|public|protected|default|private|final|static|abstract|Notes|
-|---|---|---|---|---|---|---|---|---|
-|Concrete method|✅|✅|✅|✅|✅|✅|❌|Can combine static/final|
-|Abstract method|✅|✅|✅|❌|❌|❌|✅|Must be overridden by subclass|
-|Nested class methods|Same rules as above|||||||Inherited rules apply|
-
-
-| Constructor Type | public | protected | default | private | final | static | Notes                                       |
-| ---------------- | ------ | --------- | ------- | ------- | ----- | ------ | ------------------------------------------- |
-| Concrete class   | ✅      | ✅         | ✅       | ✅       | ❌     | ❌      | Private used for Singleton/factory patterns |
-| Abstract class   | ✅      | ✅         | ✅       | ✅       | ❌     | ❌      | Called via `super()` from subclass          |
+- `numberOfLeadingZeros`
