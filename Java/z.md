@@ -138,3 +138,67 @@ Service failure
 Idempotency
 Data consistency
 ✅ Day 45 – Final Mock Interview
+
+------------------------------------------------------------------------------------
+
+🚀 🔥 MUST-KNOW (High Interview Weight)
+✅ Java 8 (VERY IMPORTANT – foundation)
+
+This is still the most asked version.
+
+Streams API
+map, filter, reduce
+collect, groupingBy
+Lambda Expressions
+Functional Interfaces
+Predicate, Function, Consumer, Supplier
+Method References
+Optional
+Date & Time API (java.time)
+
+👉 If you master Java 8 → you clear 70% of interviews
+
+✅ Java 9–11 (Moderate but important)
+🔹 Java 9
+var (actually Java 10 but grouped conceptually)
+Private methods in interfaces
+Stream improvements (takeWhile, dropWhile)
+Modular system (basic idea only)
+🔹 Java 10
+var (local variable type inference)
+🔹 Java 11 (LTS)
+String methods:
+isBlank(), lines(), strip()
+var in lambda parameters
+New HTTP Client (HttpClient)
+✅ Java 14–17 (VERY IMPORTANT – modern Java)
+🔹 Java 14
+Switch expressions (🔥 very popular question)
+🔹 Java 15
+Text Blocks (""" multi-line strings)
+🔹 Java 16
+Records (🔥 VERY IMPORTANT)
+🔹 Java 17 (LTS)
+Sealed Classes
+Pattern Matching (instanceof)
+🚀 🔥 HIGH-VALUE MODERN FEATURES (Differentiate You)
+✅ Java 18–21
+🔹 Java 19 / 21
+Virtual Threads (🔥🔥 HOT topic)
+Lightweight threads
+Used in high-concurrency apps
+🔹 Java 21 (LTS)
+Pattern Matching for switch
+Record Patterns
+Sequenced Collections
+
+👉 If you say Virtual Threads + Pattern Matching → interviewer knows you're updated
+
+🚀 ⚡ NICE-TO-KNOW (Bonus, not mandatory)
+Java 22–24 (latest, low interview frequency but impressive)
+String Templates (preview)
+Scoped Values (alternative to ThreadLocal)
+Unnamed Patterns & Variables (_)
+Foreign Function & Memory API (advanced)
+
+👉 Mention only if interviewer is senior / asks "latest Java"
