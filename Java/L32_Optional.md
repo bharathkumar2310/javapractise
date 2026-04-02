@@ -224,3 +224,41 @@ Very important 👇
         ✔ Enables functional style
         ✔ Improves API design
         ✔ Provides safe defaults & error handling
+
+
+
+![img.png](../Images/Opt1.png)
+
+![img_1.png](../Images/Opt2.png)
+
+![img_2.png](../Images/Opt3.png)
+
+![img_3.png](../Images/Opt4.png)
+
+![img_4.png](../Images/Opt5.png)
+
+![img_5.png](../Images/Opt6.png)
+
+![img_6.png](../Images/Opt7.png)
+
+![img_7.png](../Images/Opt8.png)
+
+![img_8.png](../Images/Opt9.png)
+
+![img_9.png](../Images/Opt10.png)
+
+![img_10.png](../Images/Opt11.png)
+
+![img_11.png](../Images/Opt12.png)
+
+![img_12.png](../Images/Opt13.png)
+
+![img_13.png](../Images/Opt14.png)
+
+![img_14.png](../Images/Opt15.png)
+
+![img_15.png](../Images/Opt17.png)
+
+![img_16.png](../Images/Opt19.png)
+
+![img_17.png](../Images/Opt18.png)
