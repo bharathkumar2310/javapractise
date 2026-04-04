@@ -29,6 +29,7 @@ The List interface is a part of the Java Collections Framework and is implemente
 | `subList(int fromIndex, int toIndex)`          | `List<E>`         | Returns a **view of the portion of the list** between the specified indices (`fromIndex` inclusive, `toIndex` exclusive).                                                |
 
 
+subList() points to the same underlying list (it’s a view).
 
 ![img_1.png](../Images/List2.png)
 
@@ -38,6 +39,7 @@ The List interface is a part of the Java Collections Framework and is implemente
 
 ![img_4.png](../Images/List5.png)
 
+👉 set(index, value) and add(index, value) can ONLY update an existing index
 
 
 
@@ -304,3 +306,5 @@ When the iterator is created, it captures the current array (e.g., Array2).
 No new array object is created.
 
 WHen on write it creates a new array and updates the reference to point to the new array but the iterator is still iterating over the old array so it does not see the new element and does not throw any exception.
+👉 The new array becomes the current array immediately after the modification — NOT after the iterator finishes.
+but iterator will point to the old array only

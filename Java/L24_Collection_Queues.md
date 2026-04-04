@@ -449,3 +449,83 @@ Why? Because null is used as a special return value for some queue operations:
         peek()	Returns null if queue is empty
 
 If null were allowed as a normal element, you cannot distinguish between “queue is empty” and “queue contains a null element.”
+
+
+
+🔹 Key Idea First
+
+👉 ArrayDeque uses:
+
+circular array
+two pointers:
+head → points to first element
+tail → points to next insertion position at end
+🔹 Assume initial state
+
+Let’s assume capacity = 8 (for easy visualization)
+
+Index:   0 1 2 3 4 5 6 7
+- - - - - - - -
+🔸 Step 1: Add 1,2,3,4,5 (addLast)
+dq.addLast(1);
+dq.addLast(2);
+dq.addLast(3);
+dq.addLast(4);
+dq.addLast(5);
+
+👉 State:
+
+Index:   0 1 2 3 4 5 6 7
+1 2 3 4 5 - - -
+
+head = 0
+tail = 5   (next free position)
+🔸 Step 2: addFirst(6)
+dq.addFirst(6);
+
+👉 Head moves backward (circular)
+
+head = (0 - 1 + 8) % 8 = 7
+
+👉 State:
+
+Index:   0 1 2 3 4 5 6 7
+1 2 3 4 5 - - 6
+
+head = 7
+tail = 5
+🔸 Step 3: addLast(7)
+dq.addLast(7);
+
+👉 Insert at tail, then move tail forward:
+
+Index:   0 1 2 3 4 5 6 7
+1 2 3 4 5 7 - 6
+
+head = 7
+tail = 6
+🔹 Final Logical Order
+
+👉 Start from head and move circular:
+
+6 → 1 → 2 → 3 → 4 → 5 → 7
+🔹 How iteration works
+
+👉 Iteration starts from head
+
+Loop:
+i = head = 7 → 6
+i = 0        → 1
+i = 1        → 2
+i = 2        → 3
+i = 3        → 4
+i = 4        → 5
+i = 5        → 7
+
+👉 Stops when i == tail
+
+🔹 Important Rule
+
+👉 Iteration:
+
+for (int i = head; i != tail; i = (i + 1) % capacity)

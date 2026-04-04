@@ -340,3 +340,7 @@ here Arithmetic Exception obj becomes the cause for our newly created obj
 boolean writableStackTrace ---> By default it will be false 
 By default JVM will store all the stack trace like method, class line no etc
 If set to false it wont save
+
+
+👉 JVM can propagate checked exceptions
+👉 But compiler does not allow it unless you declare throws
