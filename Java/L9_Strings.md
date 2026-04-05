@@ -66,9 +66,11 @@ String str = “GeeksforGeeks”;
 | `intern()`                                     | Returns reference from String Pool     | `String`    |
 
 Most methods return a new string object since strings are immutable. For example, `toUpperCase()` creates a new string with uppercase characters, leaving the original string unchanged.
+substring also creates new obj
 
 equals in String checks the content whereas == checks the reference (memory address). So, two different String objects with the same content will be equal using equals() but not using ==.
 
+👉 String is thread-safe ✅ because of immutable nature. Multiple threads can safely share the same String instance without synchronization.
 
 
 String Builder :
@@ -259,35 +261,295 @@ Disadvantages of StringBuffer
     Slower in Single-Threaded Code: Synchronization adds overhead when thread safety is not needed.
     Less Efficient Than StringBuilder: StringBuilder provides the same features with better performance in non-threaded scenarios.
 
-| Feature           | String 🧊                     | StringBuilder 🚀                    | StringBuffer 🔒                    |
-| ----------------- | ----------------------------- | ----------------------------------- | ---------------------------------- |
-| Mutability        | ❌ Immutable                   | ✅ Mutable                           | ✅ Mutable                          |
-| Thread Safety     | ❌ Not thread-safe             | ❌ Not thread-safe                   | ✅ Thread-safe (synchronized)       |
+| Feature           | String 🧊                | StringBuilder 🚀                    | StringBuffer 🔒                    |
+| ----------------- | ------------------------ | ----------------------------------- | ---------------------------------- |
+| Mutability        | ❌ Immutable              | ✅ Mutable                           | ✅ Mutable                          |
+| Thread Safety     |  thread-safe             | ❌ Not thread-safe                   | ✅ Thread-safe (synchronized)       |
 | Performance       | 🐢 Slow (creates new objects) | 🚀 Fastest                          | 🐢 Slower (sync overhead)          |
-| Internal Storage  | `byte[]` (Java 9+)            | `char[]`                            | `char[]`                           |
-| Object Creation   | New object on every change    | Same object reused                  | Same object reused                 |
-| Memory Usage      | Higher (due to immutability)  | Efficient                           | Slightly higher than builder       |
-| String Pool       | ✅ Yes                         | ❌ No                                | ❌ No                               |
-| Synchronization   | ❌ None                        | ❌ None                              | ✅ All major methods                |
-| Introduced In     | Java 1.0                      | Java 5                              | Java 1.0                           |
-| Use Case          | Constants, read-only data     | Single-threaded string manipulation | Multi-threaded string manipulation |
-| Resizable Buffer  | ❌ No                          | ✅ Yes                               | ✅ Yes                              |
-| append() behavior | Creates new object            | Modifies same object                | Modifies same object               |
-| equals()          | Compares content              | Inherited (reference)               | Inherited (reference)              |
+| Internal Storage  | `byte[]` (Java 9+)       | `char[]`                            | `char[]`                           |
+| Object Creation   | New object on every change | Same object reused                  | Same object reused                 |
+| Memory Usage      | Higher (due to immutability) | Efficient                           | Slightly higher than builder       |
+| String Pool       | ✅ Yes                    | ❌ No                                | ❌ No                               |
+| Synchronization   | ❌ None                   | ❌ None                              | ✅ All major methods                |
+| Introduced In     | Java 1.0                 | Java 5                              | Java 1.0                           |
+| Use Case          | Constants, read-only data | Single-threaded string manipulation | Multi-threaded string manipulation |
+| Resizable Buffer  | ❌ No                     | ✅ Yes                               | ✅ Yes                              |
+| append() behavior | Creates new object       | Modifies same object                | Modifies same object               |
+| equals()          | Compares content         | Inherited (reference)               | Inherited (reference)              |
 
 
 String s1 = new String("hello");
 String s2 = "hello";
 
-System.out.println(s1 == s2);           // ❌ false
-System.out.println(s1.intern() == s2);  // ✅ true
+      System.out.println(s1 == s2);           // ❌ false
+      System.out.println(s1.intern() == s2);  // ✅ true
 
-here s1 will still reference a different object in heap memory, but s1.intern() will return the reference to the string literal "hello" in the String Pool, which is the same as s2.
+      here s1 will still reference a different object in heap memory, but s1.intern() will return the reference to the string literal "hello" in the String Pool, which is the same as s2.
 
 if u do s1 = s1.intern(); then s1 will also reference the same string literal in the String Pool, and s1 == s2 will be true.
 
 
 
-intern() method returns a canonical representation for the string object. 
-It checks if an identical string already exists in the String Pool. 
-If it does, it returns the reference to that string; otherwise, it adds the string to the pool and returns its reference. This allows for memory optimization by reusing string literals.
+      intern() method returns a canonical representation for the string object. 
+      It checks if an identical string already exists in the String Pool. 
+      If it does, it returns the reference to that string; otherwise, it adds the string to the pool and returns its reference. This allows for memory optimization by reusing string literals.
+      
+
+
+
+1. Why String is Immutable (DEEP Answer)
+         
+         Definition first:
+         A String is immutable → once created, its value cannot be changed.
+         
+         👉 WHY (this is what interviewers care about)
+         1. 🔐 Security
+         
+         Strings are used in sensitive areas:
+         
+         Class loading ("java.lang.String")
+         File paths
+         DB URLs
+         Network connections
+         
+         👉 If String were mutable:
+         
+         String url = "jdbc:mysql://prod-db";
+         
+         Someone could change it to:
+         
+         jdbc:mysql://hacker-db
+         
+         ✔ Immutability prevents this.
+
+2. 🧠 String Pool (Memory Optimization)
+            
+            Because Strings don’t change → JVM can reuse them.
+            
+            String a = "hello";
+            String b = "hello";
+            
+            👉 Both point to same object.
+            
+            ✔ Saves memory massively.
+
+   3. 🧵 Thread Safety
+            
+               Since value cannot change:
+            
+               No synchronization needed
+               Safe to share across threads
+            
+               ✔ Zero concurrency issues
+
+   4. ⚡ HashCode Caching
+         
+            String is heavily used as key in HashMap.
+         
+            map.get("userId");
+         
+            👉 Hashcode is computed once and reused.
+
+✔ Improves performance significantly
+
+🔥 2. String Pool Internals
+👉 Where is String Pool?
+      
+      Before Java 7 → PermGen
+      After Java 7 → Heap
+      
+      ✔ Important interview point
+      
+      👉 Example
+      String a = "hello";
+      String b = "hello";
+      
+      👉 Memory:
+      
+      String Pool:
+      "hello"  ← both a & b point here
+      👉 With new keyword
+      String a = new String("hello");
+      
+      👉 Memory:
+      
+      String Pool:        Heap:
+      "hello"          new "hello" object
+      
+      ✔ Two objects created
+      
+      👉 Key takeaway
+      Code	Objects
+      "hello"	1 (pooled)
+      new String("hello")	2
+🔥 3. HashCode Caching in String
+👉 How it works
+      
+      Inside String class:
+      
+      private int hash;
+      👉 First call:
+      s.hashCode();
+      
+      → calculated and stored
+      
+      👉 Next calls:
+      
+      → reused (no recomputation)
+      
+      👉 WHY?
+      
+      Because:
+      
+      Strings are immutable → hash never changes
+      HashMap operations become faster
+      
+      ✔ Huge performance optimization
+
+🔥 4. String vs char[] (Interview Favorite)
+
+      
+      Feature	String	char[]
+      Mutability	❌ Immutable	✅ Mutable
+      Security	❌ stays in memory	✅ can erase
+      Usage	General text	Passwords
+      👉 WHY char[] for passwords?
+      char[] pwd = {'s','e','c','r','e','t'};
+      
+      👉 Can clear:
+      
+      Arrays.fill(pwd, '*');
+      
+      But String:
+      
+      String pwd = "secret"; // stays in memory
+
+✔ Security risk
+
+🔥 5. String Concatenation Internals
+      
+      👉 Compile-time
+      String s = "a" + "b";
+      
+      ✔ JVM optimizes to:
+      
+      String s = "ab";
+      👉 Runtime
+      String s = a + b;
+      
+      ✔ Internally becomes:
+      
+      new StringBuilder().append(a).append(b).toString();
+      👉 WHY?
+      
+      Because String is immutable → cannot modify directly.
+
+🔥 6. StringBuilder vs StringBuffer (REAL Answer)
+👉 Key Difference
+Feature	StringBuilder	StringBuffer
+Thread-safe	❌ No	✅ Yes
+Performance	🚀 Fast	🐢 Slower
+👉 Interview Answer (Important)
+
+👉 When to use StringBuffer?
+
+✔ Only when:
+
+Multiple threads modify the SAME object
+
+👉 Reality:
+
+Rarely used today
+Prefer StringBuilder
+🔥 7. Tricky Questions (MUST KNOW)
+👉 Question 1
+String s1 = "hello";
+String s2 = new String("hello");
+String s3 = "hello";
+
+System.out.println(s1 == s3); // ?
+
+✔ TRUE
+(Same pool reference)
+
+System.out.println(s1 == s2); // ?
+
+✔ FALSE
+(s2 is new object in heap)
+
+👉 Question 2
+String s = "hello";
+s.concat("world");
+System.out.println(s);
+
+✔ Output:
+
+hello
+
+👉 WHY?
+
+concat() creates new object
+original String unchanged
+🔥 8. Memory Optimization Questions
+👉 Why avoid new String()?
+
+❌ Creates unnecessary object
+✔ Wastes memory
+
+👉 Why StringBuilder in loops?
+String s = "";
+for(...) {
+s += "a";  // BAD
+}
+
+👉 Creates multiple objects
+
+✔ Use:
+
+StringBuilder sb = new StringBuilder();
+🔥 9. Java 9 Change (VERY IMPRESSIVE)
+👉 Before Java 9
+char[] value;
+👉 After Java 9 (Compact Strings)
+byte[] value;
+byte coder; // encoding flag
+👉 WHY?
+Saves memory (Latin chars use 1 byte instead of 2)
+Improves performance
+
+✔ Advanced interview point
+
+🔥 Bonus (Important Correction)
+👉 equals() in StringBuilder
+sb1.equals(sb2);
+
+✔ Compares reference, NOT content
+
+👉 Thread Safety Statement (Perfect Answer)
+
+❌ Wrong:
+"String is thread-safe"
+
+✔ Correct:
+👉 "String is inherently thread-safe because it is immutable."
+
+
+
+
+2️⃣ If a or b is a variable (non-final or computed)
+String a = "Hello";
+String b = "World";
+String c = a + b;
+Here a and b are variables
+Compiler cannot know the value at compile time
+a + b → StringBuilder used internally:
+String c = new StringBuilder().append(a).append(b).toString();
+✅ New String object created at runtime
+✅ Not automatically added to string pool (unless you call .intern())
+3️⃣ If a and b are final constants
+final String a = "Hello";
+final String b = "World";
+String c = a + b;
+Compiler treats them as compile-time constants
+"HelloWorld" placed in string pool
+✅ No new object

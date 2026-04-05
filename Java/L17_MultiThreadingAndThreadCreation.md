@@ -243,6 +243,9 @@ t.interrupt();
 
         Sets interrupt flag.
 
+It is like another thread needs to be exceuted and requeests the current thread to be interupted but that thread has to hanld eit
+
+
 for a working thread it just sets the interupted falg to true sate remain the same
 If the thread is blocked in methods like:
 

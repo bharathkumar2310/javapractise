@@ -451,7 +451,7 @@ JVM-level	Bytecode PC / Counter	Next bytecode instruction	Thread’s JVM data st
       The OS does this:
       
             Creates a new process
-            Loads the java executable into memor
+            Loads the java executable into memory
             Maps its sections into memory
       The memory layout looks like:
       
@@ -461,7 +461,16 @@ JVM-level	Bytecode PC / Counter	Next bytecode instruction	Thread’s JVM data st
       Data Segment     ← JVM global variables
       Heap             ← dynamic memory
       Stack            ← thread stacks
-      
+
+        1️⃣ JVM itself is a native program
+        Written in C/C++
+        Loaded into:
+        Code segment → JVM machine code
+        Data segment → JVM internal data
+        
+        👉 So code segment = JVM code, NOT your Java code
+
+
       The important part:
       
          The Code Segment is marked as executable memory
