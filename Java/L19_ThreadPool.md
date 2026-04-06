@@ -201,10 +201,18 @@ Example:
 
     Runs multiple tasks and waits for all to complete.
 
+    <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+            throws InterruptedException;
+
 6. boolean awaitTermination(long timeout, TimeUnit unit)
    throws InterruptedException;
 
 It is used after shut down or shutdownnow() 
+
+awaitTermination() → wait for completion
+ask calling thread to wait untill all the shutdown tasks are completed or timeout occurs or thread is interrupted
+
+
 
 
 
@@ -258,6 +266,13 @@ Behavior:
     👉 Running tasks may STILL continue if they ignore interruption.
 
 Both shutdown and stop leads to terminated state
+
+
+⚡ Why is Tidying important?
+1. Final cleanup point
+   Release resources
+   Logging
+   Monitoring
 
 ![img.png](../Images/shutD1.png)
 
@@ -559,6 +574,7 @@ METHODS :
       scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit)
       scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit)
 
+Every method returns a ScheduledFuture that can be used to cancel or check the status of the task.
 
 ScheduleAtFixedRate:
 

@@ -35,6 +35,10 @@
 | `boolean isEmpty()`                            | boolean         | Checks if map is empty                                     |
 | `void clear()`                                 | void            | Removes all mappings                                       |
 
+      
+      final class KeySet extends AbstractSet<K> {
+         final HashMap<K,V> map;  // 👈 reference stored
+      }
 
 ![img_2.png](../Images/Map3.png)
 
