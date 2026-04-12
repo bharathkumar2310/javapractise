@@ -202,3 +202,139 @@ Unnamed Patterns & Variables (_)
 Foreign Function & Memory API (advanced)
 
 👉 Mention only if interviewer is senior / asks "latest Java"
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+
+🚀 Microservices Interview Preparation (15-Day Plan)
+🟢 Day 1: Basics of Microservices
+What is Microservices?
+Monolith vs Microservices
+Advantages & disadvantages
+When to use microservices
+Real-world examples (Netflix, Amazon)
+
+👉 Must know:
+
+Why companies moved from monolith → microservices
+🟢 Day 2: Core Architecture Concepts
+Microservices architecture diagram
+API Gateway concept
+Service registry & discovery
+Client-server communication
+
+👉 Learn:
+
+How services talk to each other (sync vs async)
+🟢 Day 3: Spring Boot Basics (Very Important)
+
+Learn with Spring Boot
+
+REST API creation
+Controllers, Services, Repositories
+Dependency Injection
+Application.properties
+
+👉 Interview focus:
+
+Why Spring Boot for microservices?
+🟢 Day 4: REST APIs Deep Dive
+REST principles (GET, POST, PUT, DELETE)
+Status codes
+Idempotency
+Best practices
+🟢 Day 5: Service Communication
+RestTemplate (older)
+WebClient (reactive)
+Feign Client (important)
+
+👉 Concept:
+
+Synchronous communication between services
+🟢 Day 6: Service Discovery
+
+Learn:
+
+Eureka Server
+Eureka Client
+
+👉 Key idea:
+
+How services find each other dynamically
+🟢 Day 7: API Gateway
+What is API Gateway?
+Routing
+Authentication at gateway
+Rate limiting
+
+Tools:
+
+Spring Cloud Gateway
+🟢 Day 8: Configuration Management
+External configuration
+Spring Cloud Config Server
+Centralized config management
+🟢 Day 9: Fault Tolerance (VERY IMPORTANT)
+Circuit Breaker
+Retry mechanism
+Timeouts
+Bulkhead pattern
+
+👉 Tools:
+
+Resilience4j
+
+👉 Interview favorite:
+
+Difference between Circuit Breaker vs Bulkhead
+🟢 Day 10: Messaging & Async Communication
+
+Learn Apache Kafka
+
+Producer/Consumer
+Topics, partitions
+Event-driven architecture
+RabbitMQ vs Kafka
+🟢 Day 11: Database in Microservices
+Database per service
+Distributed data
+Saga pattern intro
+Data consistency issues
+🟢 Day 12: Security
+
+Learn:
+
+JWT authentication
+OAuth2 basics
+API Gateway security
+Role-based access control
+🟢 Day 13: Logging & Monitoring
+Centralized logging
+ELK stack (Elasticsearch, Logstash, Kibana)
+Distributed tracing (Zipkin, Sleuth)
+Health checks / Actuator
+🟢 Day 14: Deployment & DevOps Basics
+Docker basics
+Kubernetes intro
+CI/CD pipelines
+Service scaling
+
+👉 Key idea:
+
+How microservices are deployed in real world
+🟢 Day 15: Interview Scenarios + Revision
+
+Practice:
+
+System design questions
+Real-world scenarios:
+Design Amazon-like system
+Handle high traffic
+Service failure handling
+
+👉 Revise:
+
+Circuit breaker vs retry vs bulkhead
+API gateway role
+Service discovery flow
