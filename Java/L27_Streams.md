@@ -598,3 +598,127 @@ Combiner is used in parallel processing to merge partial results from different 
 collect() method internally uses supplier to create a new collection, accumulator to add elements, and combiner to merge results in parallel processing.
 
 
+🔹 Method Variants (IMPORTANT)
+1️⃣ Without identity
+Optional<T> reduce(BinaryOperator<T> accumulator)
+Example
+List<Integer> list = Arrays.asList(1, 2, 3, 4);
+
+Optional<Integer> sum = list.stream()
+.reduce((a, b) -> a + b);
+
+System.out.println(sum.get()); // 10
+2️⃣ With identity (MOST USED)
+T reduce(T identity, BinaryOperator<T> accumulator)
+Example
+int sum = list.stream()
+.reduce(0, (a, b) -> a + b);
+
+System.out.println(sum); // 10
+
+👉 0 is the starting value (identity)
+
+3️⃣ With identity + combiner (Parallel streams)
+U reduce(U identity,
+BiFunction<U, ? super T, U> accumulator,
+BinaryOperator<U> combiner)
+
+Used mainly in parallel streams
+
+🔹 Step-by-step intuition
+
+Example:
+
+list = [1, 2, 3, 4]
+.reduce(0, (a, b) -> a + b)
+
+
+Can Lambda access local variables?
+Yes, but they must be:
+👉 final or effectively final
+
+What is "effectively final"?
+Variable not declared final but never modified.
+
+int x = 10;
+x = 20; ❌ not allowed in lambda
+
+
+What is short-circuiting?
+Stops processing early
+Example:
+
+findFirst()
+anyMatch()
+
+
+
+1. Primitive Streams in Java
+
+Instead of Stream<int>, Java gives:
+
+Primitive	Stream Type
+int	IntStream
+long	LongStream
+double	DoubleStream
+🔹 2. Why not Stream<int>?
+
+Java generics work only with objects, not primitives.
+
+So this is ❌ invalid:
+
+Stream<int> stream; // Not allowed
+🔹 3. How to use primitive streams?
+✅ Example
+IntStream stream = IntStream.of(1, 2, 3, 4);
+✅ From array
+int[] arr = {1, 2, 3};
+
+IntStream stream = Arrays.stream(arr);
+✅ Range
+IntStream.range(1, 5);      // 1,2,3,4
+IntStream.rangeClosed(1,5); // 1,2,3,4,5
+🔹 4. Why primitive streams are important?
+
+👉 Avoid boxing/unboxing overhead
+
+Without primitive stream ❌
+Stream<Integer> stream = list.stream();
+int → Integer (boxing)
+Slower
+With primitive stream ✅
+IntStream stream = list.stream().mapToInt(Integer::intValue);
+Faster
+Memory efficient
+🔹 5. Special methods in primitive streams
+
+Primitive streams have extra useful methods:
+
+IntStream.of(1,2,3).sum();
+IntStream.of(1,2,3).average();
+IntStream.of(1,2,3).max();
+
+These are not available directly in Stream<Integer>
+
+🔹 6. Conversions
+Object → Primitive
+list.stream().mapToInt(Integer::intValue);
+Primitive → Object
+IntStream.of(1,2,3).boxed();
+🔥 Interview Trap Question
+
+👉 Q: Which is better?
+
+list.stream().map(x -> x * 2)
+
+vs
+
+list.stream().mapToInt(x -> x * 2)
+
+✅ Answer:
+
+mapToInt() is better when working with numbers
+
+
+❌ Stream.range() → not available
+✅ IntStream.range() → available

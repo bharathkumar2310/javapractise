@@ -4,6 +4,25 @@ Async (Asynchronous) means:
     The caller continues execution immediately.
     Async is about behavior, not about number of threads.
 
+When does Java become async?
+
+Only when you explicitly introduce it:
+      
+      ✅ Using Thread
+      new Thread(() -> {
+      System.out.println("Async Task");
+      }).start();
+
+✅ Using ExecutorService
+      
+      ExecutorService executor = Executors.newFixedThreadPool(2);
+      executor.submit(() -> System.out.println("Async"));
+
+✅ Using CompletableFuture (Modern way)
+
+      CompletableFuture.runAsync(() -> {
+      System.out.println("Async Task");
+      });
 
 FUTURE :
 
@@ -48,6 +67,14 @@ public class Main {
 }
 
 ```
+
+
+2. Result stored safely
+   Stored in FutureTask
+   Uses volatile + synchronization internally
+3. future.get() does 2 critical things:
+   ✅ (1) WAITS (blocking)
+   Main thread pauses until result is ready
 
 METHODS :
 
@@ -195,6 +222,16 @@ in that run it calls callable.call() which is runnableAdaptor.call() ---> which 
 
 ----> for submit of callable runnable Adaptor is not used in FutureTask.run() it calls callable.call() and the callable task directly executes
 
+
+Limitations of Future ❗ (VERY IMPORTANT)
+
+      ❌ Blocking (get())
+      ❌ No chaining
+      ❌ No callbacks
+      ❌ Hard to combine multiple tasks
+      ❌ Poor exception handling
+
+👉 This is why CompletableFuture was introduced
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -413,3 +450,123 @@ public class ThenCombineExample {
 ```
 
 ![img_1.png](../Images/CF8.png)
+
+
+
+-------------------------------------------------------------------------------------------------------------
+
+
+| Feature            | submit()    | execute()       |
+| ------------------ | ----------- | --------------- |
+| Return             | Future      | void            |
+| Exception handling | Captured    | Lost            |
+| Use case           | Need result | Fire-and-forget |
+
+
+🔹 5. Multiple Futures
+👉 16. allOf()
+
+Wait for all futures
+
+      CompletableFuture.allOf(f1, f2, f3);
+
+👉 17. anyOf()
+
+      Returns first completed future
+
+
+| Feature   | get()   | join()    |
+| --------- | ------- | --------- |
+| Exception | Checked | Unchecked |
+| Usage     | Legacy  | Preferred |
+
+
+👉 join() is available in: CompletableFuture
+
+
+
+🔹 1. Exception Handling in Future
+👉 How exceptions are handled?
+      
+      Future<Integer> future = executor.submit(() -> {
+      throw new RuntimeException("Error");
+      });
+      
+      try {
+      future.get();
+      } catch (Exception e) {
+      System.out.println(e);
+      }
+
+🔥 What actually happens?
+
+      Exception is captured internally
+When you call get():
+
+      It throws ExecutionException
+      Actual exception is wrapped inside
+
+👉 How to access real exception?
+
+      catch (ExecutionException e) {
+      Throwable actual = e.getCause();
+      }
+❗ Problems with Future
+      
+      ❌ Only handled at get() (blocking point)
+      ❌ No async handling
+      ❌ No fallback mechanism
+      ❌ No chaining
+      ❌ Wrapped exceptions → messy
+
+🔹 2. Exception Handling in CompletableFuture
+
+👉 Much more powerful & flexible
+
+✅ 1. exceptionally() (Most common)
+      
+      CompletableFuture<Integer> cf =
+      CompletableFuture.supplyAsync(() -> {
+      throw new RuntimeException("Error");
+      });
+      
+      cf.exceptionally(ex -> {
+      System.out.println(ex);
+      return 0;
+      });
+
+✔ Provides fallback value
+✔ Non-blocking
+
+✅ 2. handle() (VERY IMPORTANT)
+      
+      cf.handle((result, ex) -> {
+      if (ex != null) return 0;
+      return result;
+      });
+
+✔ Gets both:
+      
+      result
+      exception
+
+✔ Can recover or transform
+
+✅ 3. whenComplete()
+      
+      cf.whenComplete((res, ex) -> {
+      System.out.println("Done");
+      });
+      
+      ✔ Just observes
+      ❌ Cannot change result
+
+🔹 3. Comparison Table 🔥
+
+| Feature           | Future             | CompletableFuture   |
+| ----------------- | ------------------ | ------------------- |
+| Handling style    | Blocking (`get()`) | Non-blocking        |
+| Exception type    | ExecutionException | Original exception  |
+| Chaining          | ❌                  | ✔                   |
+| Fallback support  | ❌                  | ✔ (`exceptionally`) |
+| Flexible handling | ❌                  | ✔ (`handle`)        |
