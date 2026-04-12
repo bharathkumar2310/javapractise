@@ -224,7 +224,7 @@ API Gateway concept
 Service registry & discovery
 Client-server communication
 
-👉 Learn:
+👉 Learn: 
 
 How services talk to each other (sync vs async)
 🟢 Day 3: Spring Boot Basics (Very Important)
