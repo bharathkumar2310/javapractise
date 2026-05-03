@@ -366,11 +366,12 @@ Non core threads are created only if queue becomes , if queue is full and max si
 
 
 📌 ThreadPoolExecutor Constructors
-1️⃣	ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue)	
-2️⃣	ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory)	
-3️⃣	ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler)	
-4️⃣	ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler)	
-
+        
+        1️⃣	ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue)	
+        2️⃣	ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory)	
+        3️⃣	ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler)	
+        4️⃣	ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler)	
+        
 
 
 | Category                        | Method                                                  | Purpose                         |
@@ -543,6 +544,94 @@ Resources include:
         Thread pools
 
 These are NOT managed by GC automatically.
+
+
+❌ 1. AbortPolicy (Default)
+new ThreadPoolExecutor.AbortPolicy()
+🧠 What it does:
+Reject → throw RejectedExecutionException
+🔍 Why this exists:
+Forces you to handle overload explicitly
+Prevents silent failures
+⚠️ When to use:
+Financial systems 💰
+Critical operations
+
+👉 You want to fail loudly
+
+🐌 2. CallerRunsPolicy
+new ThreadPoolExecutor.CallerRunsPolicy()
+🧠 What it does:
+Reject → run task in calling thread
+🔥 Important concept: Backpressure
+
+Let’s say:
+
+Main thread submits tasks fast
+Pool is overloaded
+
+👉 Now:
+
+Main thread starts executing tasks itself
+It becomes slow
+
+✔ Result:
+
+System automatically slows down input rate
+
+🧩 Example
+executor.submit(task);
+
+If rejected:
+
+main thread → executes task
+⚠️ When to use:
+High-throughput systems
+Where slowing down is OK
+
+
+🗑 3. DiscardPolicy
+new ThreadPoolExecutor.DiscardPolicy()
+🧠 What it does:
+Reject → silently drop task
+🚨 Why dangerous:
+No exception
+No logging
+You won’t even know it happened
+⚠️ When to use:
+Logging systems
+Metrics collection
+Non-critical events
+
+🔄 4. DiscardOldestPolicy
+new ThreadPoolExecutor.DiscardOldestPolicy()
+🧠 What it does:
+Queue full →
+Remove oldest task →
+Insert new task
+🔍 Why this exists:
+Prioritize latest data
+🧩 Example
+
+Queue:
+
+[A, B, C, D] (full)
+
+New task = E
+
+👉 Result:
+
+[B, C, D, E]
+⚠️ When to use:
+Streaming systems
+Real-time dashboards
+
+| Policy        | Behavior              | Risk               |
+| ------------- | --------------------- | ------------------ |
+| AbortPolicy   | Exception             | Safe but fails     |
+| CallerRuns    | Runs in caller thread | Slower             |
+| Discard       | Drops task            | Data loss ❌        |
+| DiscardOldest | Drops oldest          | Data inconsistency |
 
 
 ----------------------------------------------------------------------------------------------------------------------------------

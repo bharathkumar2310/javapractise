@@ -570,3 +570,87 @@ When you call get():
 | Chaining          | ❌                  | ✔                   |
 | Fallback support  | ❌                  | ✔ (`exceptionally`) |
 | Flexible handling | ❌                  | ✔ (`handle`)        |
+
+
+
+
+Future helps with exception handling by capturing exceptions thrown in another thread and rethrowing them when you try to get the result.
+
+Without it, exceptions in threads are easy to miss.
+
+❌ Problem without Future
+new Thread(() -> {
+throw new RuntimeException("Something failed");
+}).start();
+
+👉 What happens?
+
+Exception occurs in another thread
+Main thread does NOT know about it
+You lose control ❌
+✅ With Future
+ExecutorService executor = Executors.newSingleThreadExecutor();
+
+Future<Integer> future = executor.submit(() -> {
+throw new RuntimeException("Failure");
+});
+🔑 When you call get()
+try {
+future.get();
+} catch (Exception e) {
+System.out.println(e);
+}
+
+👉 Output:
+
+ExecutionException: java.lang.RuntimeException: Failure
+🧠 What’s happening internally
+Task runs in another thread
+If exception occurs:
+It is captured and stored inside Future
+When you call get():
+Future wraps it in ExecutionException
+Then throws it to caller thread
+
+
+
+✅
+
+🔥 Basic example
+CompletableFuture<Integer> cf =
+CompletableFuture.supplyAsync(() -> {
+throw new RuntimeException("Something failed");
+});
+✅ 1. exceptionally() → recover from error
+cf.exceptionally(ex -> {
+System.out.println("Error: " + ex);
+return 0; // fallback value
+});
+
+✔ Runs only if exception occurs
+✔ Returns a fallback value
+✔ Converts failure → success
+
+✅ 2. handle() → always runs (success + failure)
+cf.handle((result, ex) -> {
+if (ex != null) {
+System.out.println("Error: " + ex);
+return 0;
+}
+return result;
+});
+
+✔ Runs in both cases
+✔ Gives:
+
+result (if success)
+ex (if failure)
+✅ 3. whenComplete() → side effect only
+cf.whenComplete((result, ex) -> {
+if (ex != null) {
+System.out.println("Error occurred");
+}
+});
+
+✔ Just observes
+❌ Cannot modify result

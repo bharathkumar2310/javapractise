@@ -722,3 +722,16 @@ mapToInt() is better when working with numbers
 
 ❌ Stream.range() → not available
 ✅ IntStream.range() → available
+
+
+| Feature              | `partitioningBy`                  | `groupingBy`                            |
+| -------------------- | --------------------------------- | --------------------------------------- |
+| **Purpose**          | Split data into 2 groups          | Group data into multiple categories     |
+| **Condition type**   | Boolean (`true / false`)          | Any key (Integer, String, Object, etc.) |
+| **Return type**      | `Map<Boolean, List<T>>`           | `Map<K, List<T>>`                       |
+| **Number of groups** | Always **2**                      | **0 to many**                           |
+| **Key values**       | Only `true` and `false`           | Anything (length, name, id, etc.)       |
+| **Use case**         | Binary classification             | General grouping                        |
+| **Empty groups**     | Always present (`true` & `false`) | Only created if data exists             |
+| **Flexibility**      | Limited                           | Very flexible                           |
+| **Performance**      | Slightly optimized for 2 groups   | General-purpose                         |

@@ -367,6 +367,22 @@ public class Main {
 | **`PriorityBlockingQueue`** | Not exactly Deque, but implements Queue interface | Thread-safe, for priority-based tasks                               |
 
 
+Blocking uses locks , concurrent uses CAS
+
+| Queue Type        | Implementation        | Thread-Safe | Blocking  | Insert   | Remove   | Peek | Search | Internal Structure   | Use Case               |
+| ----------------- | --------------------- | ----------- | --------- | -------- | -------- | ---- | ------ | -------------------- | ---------------------- |
+| Deque (Best)      | ArrayDeque            | ❌           | ❌         | O(1)     | O(1)     | O(1) | O(n)   | Circular Array       | Fast queue/stack       |
+| Queue             | LinkedList            | ❌           | ❌         | O(1)     | O(1)     | O(1) | O(n)   | Doubly Linked List   | General purpose        |
+| Priority Queue    | PriorityQueue         | ❌           | ❌         | O(log n) | O(log n) | O(1) | O(n)   | Binary Heap          | Scheduling, ordering   |
+| Blocking Queue    | ArrayBlockingQueue    | ✅           | ✅         | O(1)     | O(1)     | O(1) | O(n)   | Array + Lock         | Producer-consumer      |
+| Blocking Queue    | LinkedBlockingQueue   | ✅           | ✅         | O(1)     | O(1)     | O(1) | O(n)   | Linked Nodes + Lock  | High throughput queues |
+| Blocking Deque    | LinkedBlockingDeque   | ✅           | ✅         | O(1)     | O(1)     | O(1) | O(n)   | Doubly Linked + Lock | Double-ended blocking  |
+| Lock-Free Queue   | ConcurrentLinkedQueue | ✅           | ❌         | O(1)     | O(1)     | O(1) | O(n)   | CAS + Linked Nodes   | High concurrency       |
+| Lock-Free Deque   | ConcurrentLinkedDeque | ✅           | ❌         | O(1)     | O(1)     | O(1) | O(n)   | CAS + Doubly Linked  | Concurrent deque       |
+| Transfer Queue    | LinkedTransferQueue   | ✅           | ⚠️ Hybrid | O(1)     | O(1)     | O(1) | O(n)   | CAS + Linked         | Direct handoff         |
+| Delay Queue       | DelayQueue            | ✅           | ✅         | O(log n) | O(log n) | O(1) | O(n)   | Priority Heap        | Scheduling delays      |
+| Synchronous Queue | SynchronousQueue      | ✅           | ✅         | O(1)     | O(1)     | ❌    | ❌      | No storage           | Thread handoff         |
+
 
 ARRAYDEQUE:
 
@@ -500,7 +516,7 @@ dq.addLast(7);
 👉 Insert at tail, then move tail forward:
 
 Index:   0 1 2 3 4 5 6 7
-1 2 3 4 5 7 - 6
+         1 2 3 4 5 7 - 6
 
 head = 7
 tail = 6
@@ -529,3 +545,14 @@ i = 5        → 7
 👉 Iteration:
 
 for (int i = head; i != tail; i = (i + 1) % capacity)
+
+
+
+| Implementation        | Insert   | Remove   | Peek | Search | Notes                            |
+| --------------------- | -------- | -------- | ---- | ------ | -------------------------------- |
+| ArrayDeque            | O(1)     | O(1)     | O(1) | O(n)   | Fastest, no capacity restriction |
+| LinkedList            | O(1)     | O(1)     | O(1) | O(n)   | Doubly linked list               |
+| PriorityQueue         | O(log n) | O(log n) | O(1) | O(n)   | Min/Max heap                     |
+| ArrayBlockingQueue    | O(1)     | O(1)     | O(1) | O(n)   | Fixed size, thread-safe          |
+| LinkedBlockingQueue   | O(1)     | O(1)     | O(1) | O(n)   | Optional bound, thread-safe      |
+| ConcurrentLinkedQueue | O(1)     | O(1)     | O(1) | O(n)   | Lock-free, high concurrency      |

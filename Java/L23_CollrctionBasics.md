@@ -425,6 +425,7 @@ If newInteger[6] it will create an array of size 6 and copy the elements and rem
 
 
 From Object class(Collection does not extend or implemnt only clases like array list implement obj)
+
 | Method             | Return Type | Purpose                                          |
 | ------------------ | ----------- | ------------------------------------------------ |
 | `equals(Object o)` | `boolean`   | Checks equality with another object.             |

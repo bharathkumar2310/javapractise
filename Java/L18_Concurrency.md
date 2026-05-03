@@ -1298,3 +1298,10 @@ Threads keep responding to each other, but never complete their work
 WHAT IS RANDOM BACKOFF?
 
     👉 Random backoff = waiting for a random amount of time before retrying an operation
+
+
+DEADLOCK :
+    
+    A deadlock is a situation in concurrent programming where:
+    Two or more threads are waiting forever for each other to release resources.
+    👉 So no one moves forward — the program gets stuck.

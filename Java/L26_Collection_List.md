@@ -308,3 +308,8 @@ No new array object is created.
 WHen on write it creates a new array and updates the reference to point to the new array but the iterator is still iterating over the old array so it does not see the new element and does not throw any exception.
 👉 The new array becomes the current array immediately after the modification — NOT after the iterator finishes.
 but iterator will point to the old array only
+
+
+👉 A snapshot is:
+
+An immutable view of the array at a specific point in time

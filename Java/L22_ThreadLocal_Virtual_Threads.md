@@ -8,6 +8,22 @@ Key points:
         Values are not shared across threads.
         Thread-local values are attached to the thread itself, not the ThreadLocal object.
 
+
+Normally:
+
+    A variable is shared between multiple threads → can cause conflicts.
+
+With ThreadLocal:
+    
+    Each thread gets its own independent copy of the variable.
+    One thread cannot see or modify another thread’s value.
+🔧 Why use ThreadLocal?
+
+It’s useful when:
+    
+    You want to avoid synchronization issues (no need for locks).
+    Each thread needs its own state (like user session, database connection, etc.).
+
 2️⃣ How it works internally
 
 Every Java thread has a thread-local map:
@@ -23,9 +39,11 @@ Every Java thread has a thread-local map:
 
 We use ThreadLocal when we need:
 
+
         Per-thread context/state accessible throughout the thread without passing as a parameter.
         Avoid synchronization for thread-specific data.
         Maintain consistency in tasks that span multiple methods.
+
 **_a ThreadLocal object stores only one value per thread, but a thread can have many ThreadLocal variables.**_
 
 Typical Use Cases
@@ -37,6 +55,7 @@ A. User / Request Context (Web apps)
     This works perfectly within the same thread handling the request.
 
 ```java
+
 
 ThreadLocal<SecurityContext> contextHolder;
 SecurityContext context = contextHolder.get(); // current user info
@@ -56,6 +75,18 @@ Why useful:
         That all methods in the call stack use the same connection.
         We don’t want to pass the connection as a parameter to every method.
         We don’t want multiple threads interfering, so synchronization is unnecessary.
+
+
+✅ Option 1: Multiple ThreadLocal variables
+
+        ThreadLocal<Integer> userId = new ThreadLocal<>();
+        ThreadLocal<String> userName = new ThreadLocal<>();
+        
+        userId.set(101);
+        userName.set("Bharath");
+        
+        ✔ Each ThreadLocal holds its own value
+        ✔ Same thread can access both independently
 
 ```java
 
@@ -109,6 +140,7 @@ Thread-1 has its own connection.
 Any method called later in the same thread can access the connection:
 
 
+
 ```java
 void serviceMethod() throws SQLException {
     TransactionManager.startTransaction();
@@ -132,6 +164,118 @@ void serviceMethod() throws SQLException {
 
 ![img_3.png](../Images/ThreadLocal4.png)
 
+
+
+🔥 Real Use Case (Very Important)
+🧾 Example: User Request in Web App
+
+Imagine:
+
+100 users hitting your API
+Each request runs on a different thread
+
+You need to store:
+
+userId
+requestId
+auth details
+❌ Without ThreadLocal
+
+You must pass data everywhere:
+
+void controller(Request req) {
+service(req.getUserId());
+}
+
+void service(String userId) {
+repository(userId);
+}
+
+👉 Problem:
+
+You keep passing userId everywhere (tight coupling)
+Messy code
+❌ OR use shared variable (BAD)
+static String currentUser;
+
+👉 Problem:
+
+Thread A sets "User1"
+Thread B sets "User2"
+Now both threads see wrong values ❌
+✅ With ThreadLocal (Clean Solution)
+static ThreadLocal<String> currentUser = new ThreadLocal<>();
+// Controller
+currentUser.set("User1");
+
+// Anywhere in same thread
+String user = currentUser.get();
+
+✔ No need to pass parameter
+✔ No data conflict
+✔ Clean architecture
+
+🧠 What happens internally?
+
+Each thread has:
+
+Thread
+└── ThreadLocalMap
+├── ThreadLocal → value
+
+👉 So:
+
+Thread A → User1
+Thread B → User2
+
+They never collide.
+
+⚠️ What if we DON’T use ThreadLocal?
+1. You use shared variables
+
+→ ❌ Data corruption
+→ ❌ Race conditions
+
+2. You use synchronization
+   synchronized method
+
+→ ❌ Slower performance
+→ ❌ Thread blocking
+→ ❌ Scalability issues
+
+3. You pass data everywhere
+
+→ ❌ Ugly code
+→ ❌ Hard to maintain
+→ ❌ Breaks clean layering
+
+🔥 Where ThreadLocal is used in real systems
+1. Spring Security
+
+Stores logged-in user context
+
+2. Transactions
+
+Spring uses it to bind DB transaction to a thread
+
+3. Logging (MDC)
+
+Stores requestId for tracing logs
+
+4. Hibernate Session
+
+Session per thread
+
+⚠️ Important drawback
+
+If you forget:
+
+threadLocal.remove();
+
+👉 In thread pools:
+
+Thread gets reused
+Old data leaks into new request ❌ (very dangerous)
 
 **_VIRTUAL THREADS :**_
 
@@ -160,7 +304,7 @@ Example Problem:
 
 ✅ Key issue: threads are expensive and inefficient for I/O-bound workloads.
 
-2️⃣ Virtual Threads (Project Loom)
+**_2️⃣ Virtual Threads (Project Loom) (Java 21)**_
 
 Definition:
     
@@ -234,3 +378,57 @@ Advantages:
     Cheap to create and schedule.
     Simplified code: blocking I/O works naturally.
     No need for complex reactive frameworks for concurrency.
+
+
+🔑 What actually happens
+
+When you start using virtual threads:
+
+Thread.startVirtualThread(() -> {});
+Behind the scenes:
+JVM uses an internal scheduler (based on ForkJoinPool)
+That scheduler:
+creates a small number of OS threads
+usually ≈ number of CPU cores
+These OS threads are then used as carrier threads
+
+
+        
+        🔥 Example: Handling 10,000 requests
+        ❌ Using normal threads
+        ExecutorService executor = Executors.newFixedThreadPool(100);
+        
+        for (int i = 0; i < 10000; i++) {
+        executor.submit(() -> {
+        try {
+        Thread.sleep(1000); // simulate I/O
+        System.out.println("Handled by " + Thread.currentThread());
+        } catch (Exception e) {}
+        });
+        }
+        🚨 What happens:
+        Only 100 threads available
+        Remaining 9900 tasks wait in queue
+        Each sleep():
+        blocks the OS thread ❌
+        Poor scalability
+        ✅ Using virtual threads
+        for (int i = 0; i < 10000; i++) {
+        Thread.startVirtualThread(() -> {
+        try {
+        Thread.sleep(1000); // simulate I/O
+        System.out.println("Handled by " + Thread.currentThread());
+        } catch (Exception e) {}
+        });
+        }
+        🚀 What happens:
+        10,000 virtual threads created easily
+        When sleep() happens:
+        virtual thread is paused
+        OS thread is released ✅
+        OS thread runs another virtual thread
+        
+        👉 So:
+        
+        No blocking at OS level
+        Massive scalability
