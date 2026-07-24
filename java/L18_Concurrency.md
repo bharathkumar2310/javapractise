@@ -244,7 +244,12 @@ Acquires lock, but can be interrupted while waiting.
 
         lock.lockInterruptibly();
 
+
+    thread2.interrupt();
+
 Throws: InterruptedException
+
+Without lockInterruptiblity() if u do thread.interrupt() it wont work
 
 ✅ boolean tryLock()
 

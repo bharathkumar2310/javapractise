@@ -10,6 +10,27 @@
             Comparator. 
         - ConcurrentLinkedQueue: A thread-safe queue based on linked nodes.
 
+
+    1. Operating Systems
+       CPU Scheduling: Processes waiting for CPU time are often stored in a queue.
+       Printer Spooling: Print jobs are queued and printed one after another.
+       2. Web Servers
+          When thousands of users send requests simultaneously, requests are placed in queues and processed one by one or by worker threads.
+          Example: A food delivery app receiving many orders.
+       3. Message Brokers / Microservices
+    
+    Popular systems like:
+    
+    Apache Kafka
+    RabbitMQ
+    Amazon SQS
+    
+    These use queues to:
+    
+    Decouple services.
+    Handle traffic spikes.
+    Process background jobs asynchronously.
+
 | Method       | Return Type | What it Does                            | When to Use                                   |
 | ------------ | ----------- | --------------------------------------- | --------------------------------------------- |
 | `add(E e)`   | `boolean`   | Inserts element into queue              | When you want insertion and exception if full |
@@ -86,6 +107,10 @@ A Binary Heap is a complete binary tree where:
     
     The tree is completely filled except possibly the last level, which is filled from left to right.
     The heap property is maintained.
+
+
+Priority Queue is used in CPU Scheduling, Djikstras algorithm
+
 
 ![img_2.png](../Images/PQ1.png)
 

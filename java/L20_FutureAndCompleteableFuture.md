@@ -654,3 +654,25 @@ System.out.println("Error occurred");
 
 ✔ Just observes
 ❌ Cannot modify result
+
+
+
+      CompletableFuture<Integer> future =
+      CompletableFuture.supplyAsync(() -> 10 / 0)
+      .exceptionally(ex -> {
+      System.out.println("Handling error");
+      return -1;
+      });
+
+
+
+      CompletableFuture<Integer> future =
+      CompletableFuture.supplyAsync(() -> {
+      Thread.sleep(5000);
+      return 100;
+      })
+      .exceptionally(ex -> -1);
+      
+      System.out.println("Registered handler");
+      
+      Integer value = future.get(); // blocks here

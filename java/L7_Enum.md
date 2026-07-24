@@ -6,6 +6,8 @@ Think of it as a **type-safe way** to define a group of related values.
 
 For example: directions, days of the week, states, colors, etc.
 
+Each enum constant is a singleton instance of an enum class.
+
 ---
 
 ### ✅ Example

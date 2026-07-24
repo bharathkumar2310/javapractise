@@ -11,6 +11,35 @@ Key points:
     It helps avoid null checks and NPEs by providing a more expressive API.
 
 
+
+1. ifPresent()
+   name.ifPresent(System.out::println);
+
+Instead of:
+
+if (name.isPresent()) {
+System.out.println(name.get());
+}
+2. orElse()
+   String value = name.orElse("Unknown");
+
+If the value is absent, "Unknown" is returned.
+
+3. orElseGet()
+   String value = name.orElseGet(() -> generateDefaultName());
+
+The default is computed only if needed.
+
+4. orElseThrow()
+   String value = name.orElseThrow();
+
+Throw an exception if no value is present.
+
+5. map()
+   Optional<String> upper = name.map(String::toUpperCase);
+
+This transforms the value only if it exists.
+
 🔥 1. Represent “value may be absent” (PRIMARY USE)
 ❌ Problem (with null)
 

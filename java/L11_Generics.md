@@ -147,6 +147,73 @@ What is a Generic Method?
     `<type-parameter(s)> returnType methodName(parameter list)
 
 
+        1. Method-level generic
+           public <T> void put(T t)
+        
+        Here T belongs to the METHOD.
+        
+        This means:
+        
+        "This method can accept any type."
+        
+        Example:
+        
+        class Test {
+        
+            public <T> void put(T t) {
+                System.out.println(t);
+            }
+        }
+        
+        Usage:
+        
+        Test t = new Test();
+        
+        t.put("hello");
+        t.put(10);
+        t.put(true);
+        
+        All valid.
+        
+        Compiler determines T separately for each call.
+        
+        Equivalent thinking:
+        
+        put(String)
+        put(Integer)
+        put(Boolean)
+        
+        generated conceptually.
+        
+        2. Class-level generic usage
+           public void put(T t)
+        
+        Here T must already be declared at CLASS level.
+        
+        Example:
+        
+        class Box<T> {
+        
+            public void put(T t) {
+            }
+        }
+        
+        Now T belongs to object type.
+        
+        Usage:
+        
+        Box<String> b = new Box<>();
+        
+        b.put("hello"); // OK
+        b.put(10);      // ERROR
+        
+        Because for this object:
+        
+        T = String
+        
+        fixed once during object creation.
+
+
 ![img_9.png](../Images/gen10.png)
 
 ![img_10.png](../Images/gen11.png)
@@ -685,12 +752,12 @@ public class Test {
 👉 “Wherever” refers to **any place** in your code that _relies on the generic return type_ after erasure.  
 That includes:
 
-|Place|Example|What Compiler Inserts|
-|---|---|---|
-|**Assignment**|`Integer val = intBox.get();`|`(Integer)` cast added|
-|**Method argument**|`printNumber(intBox.get());`|`(Integer)` cast inside argument|
-|**Return statement**|`return box.get();` (if returning T)|cast to expected return type|
-|**Expressions**|`System.out.println(intBox.get() + 5);`|`(Integer)` cast before arithmetic|
+| Place                | Example                                 | What Compiler Inserts              |
+|----------------------|-----------------------------------------|------------------------------------|
+| **Assignment**       | `Integer val = intBox.get();`           | `(Integer)` cast added             |
+| **Method argument**  | `printNumber(intBox.get());`            | `(Integer)` cast inside argument   |
+| **Return statement** | `return box.get();` (if returning T)    | cast to expected return type       |
+| **Expressions**      | `System.out.println(intBox.get() + 5);` | `(Integer)` cast before arithmetic |
 
 ---
 
@@ -717,11 +784,11 @@ If you used generics properly (`Box<Integer>`), this code would never compile in
 
 ✅ **In summary:**
 
-|Stage|What Happens|Example|
-|---|---|---|
-|Compile time|Type check ensures only `Integer` goes in/out|`intBox.set("abc")` ❌|
-|After erasure|Type replaced with `Object`|`public Object get()`|
-|Cast injection|Compiler inserts `(Integer)` before assignment|`Integer val = (Integer) intBox.get();`|
+| Stage          | What Happens                                   | Example                                 |
+|----------------|------------------------------------------------|-----------------------------------------|
+| Compile time   | Type check ensures only `Integer` goes in/out  | `intBox.set("abc")` ❌                   |
+| After erasure  | Type replaced with `Object`                    | `public Object get()`                   |
+| Cast injection | Compiler inserts `(Integer)` before assignment | `Integer val = (Integer) intBox.get();` |
 
 
 ## ❓ Question: Why is **Type Erasure** needed in Java Generics?

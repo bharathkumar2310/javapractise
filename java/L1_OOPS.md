@@ -8,6 +8,8 @@ Each object has:
 
 - **Data (attributes or fields)**
 - **Behavior (methods or functions)**
+   
+
 ### 🎯 Goal of OOP:
 
 To make software **modular**, **reusable**, **scalable**, and **easier to maintain** by modeling real-world systems.
@@ -173,6 +175,13 @@ GeeksForGeeks
 
     Explanation: Here, creates a new Geeks object g2 by cloning the existing object g1 using the overridden clone() method. The cloned object copies the field values of g1, which is confirmed by printing g2.name.
 
+
+| Method                | Copy Type    |
+| --------------------- | ------------ |
+| `super.clone()`       | Shallow copy |
+| Manual nested cloning | Deep copy    |
+
+
 4. Using Deserialization
 
         De-serialization is a technique of reading an object from the saved state in a file. Object is recreated from a stored byte stream.
@@ -218,6 +227,12 @@ Common in event handling (e.g., button clicks).
 new Dog("Max", "Labrador", 3, "Black").getName();
 
 
+    new Runnable() {
+    @Override
+    public void run() {
+    System.out.println("Running");
+    }
+    }.run();
 
 
 --------------------------------------------------------------------------------
@@ -521,12 +536,12 @@ In OOP:
 ![[Pasted image 20251110095802.png]]
 
 
-|Purpose|Explanation|
-|---|---|
-|**Code Reusability**|Same method name works for different types of objects|
-|**Flexibility / Extensibility**|Add new functionality without changing existing code|
-|**Maintainability**|Reduce multiple if-else or switch cases|
-|**Dynamic Behavior**|Runtime decisions can be made automatically based on object type|
+| Purpose                         | Explanation                                                      |
+|---------------------------------|------------------------------------------------------------------|
+| **Code Reusability**            | Same method name works for different types of objects            |
+| **Flexibility / Extensibility** | Add new functionality without changing existing code             |
+| **Maintainability**             | Reduce multiple if-else or switch cases                          |
+| **Dynamic Behavior**            | Runtime decisions can be made automatically based on object type |
 
 ### **A. Compile-Time Polymorphism (Static)**
 
@@ -1064,12 +1079,12 @@ Mechanism by which a call to an overridden method is resolved at runtime.
 - **Deep copy** → Copies actual data (creates new instance).
 
 
-|Modifier|Scope|
-|---|---|
-|`private`|Within same class|
-|_default_|Within same package|
-|`protected`|Same package + subclasses|
-|`public`|Everywhere|
+| Modifier    | Scope                     |
+|-------------|---------------------------|
+| `private`   | Within same class         |
+| _default_   | Within same package       |
+| `protected` | Same package + subclasses |
+| `public`    | Everywhere                |
 
 
 
@@ -1088,13 +1103,13 @@ Mechanism by which a call to an overridden method is resolved at runtime.
 
 ### 💡 **Why choose Composition over Inheritance**
 
-|Aspect|Inheritance|Composition|
-|---|---|---|
-|Relationship|“is-a”|“has-a”|
-|Reuse|Reuses behavior by extending a class|Reuses behavior by including an object|
-|Flexibility|Tightly coupled (change in parent affects child)|Loosely coupled (you can swap parts)|
-|Runtime changes|Fixed at compile-time|Can change behavior at runtime|
-|Example|`class Dog extends Animal`|`class Car { Engine engine; }`|
+| Aspect          | Inheritance                                      | Composition                            |
+|-----------------|--------------------------------------------------|----------------------------------------|
+| Relationship    | “is-a”                                           | “has-a”                                |
+| Reuse           | Reuses behavior by extending a class             | Reuses behavior by including an object |
+| Flexibility     | Tightly coupled (change in parent affects child) | Loosely coupled (you can swap parts)   |
+| Runtime changes | Fixed at compile-time                            | Can change behavior at runtime         |
+| Example         | `class Dog extends Animal`                       | `class Car { Engine engine; }`         |
 
 
 
@@ -1137,3 +1152,39 @@ public class Test {
 `super` is used to **refer to the immediate parent class** (superclass) members — variables, methods, and constructors.
 
 
+| OOP Concept       | Main Purpose                   | What It Does                                                | Real-World Example                             | Java Example                           |
+| ----------------- | ------------------------------ | ----------------------------------------------------------- | ---------------------------------------------- | -------------------------------------- |
+| **Encapsulation** | Data hiding & protection       | Binds data and methods together and restricts direct access | ATM machine hides internal processing          | Private variables with getters/setters |
+| **Inheritance**   | Code reuse                     | One class acquires properties and behavior of another       | Child inherits traits from parent              | `class Car extends Vehicle`            |
+| **Polymorphism**  | Flexibility & dynamic behavior | Same method behaves differently in different situations     | One remote controlling many TV brands          | Method overloading & overriding        |
+| **Abstraction**   | Hide implementation complexity | Shows only essential features to user                       | Driving a car without knowing engine internals | Abstract classes & interfaces          |
+
+
+1. Encapsulation
+   Use:
+    
+       Protect data
+       Control access
+       Improve security
+
+   2. Inheritance
+      Use:
+    
+          Reuse existing code
+          Avoid duplication
+          Create parent-child relationship
+
+
+3. Polymorphism
+   Use:
+    
+       One interface, many forms
+       Runtime flexibility
+       Loose coupling
+
+   4. Abstraction
+      Use:
+    
+          Hide complexity
+          Show only important functionality
+          Improve maintainability

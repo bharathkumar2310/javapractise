@@ -344,3 +344,98 @@ If set to false it wont save
 
 👉 JVM can propagate checked exceptions
 👉 But compiler does not allow it unless you declare throws
+
+
+
+Why was try-with-resources introduced?
+
+      Before Java 7, resources had to be closed manually in a finally block:
+
+      BufferedReader br = null;
+
+      try {
+      br = new BufferedReader(new FileReader("test.txt"));
+      System.out.println(br.readLine());
+      } catch (IOException e) {
+      e.printStackTrace();
+      } finally {
+      if (br != null) {
+      try {
+      br.close();
+      } catch (IOException e) {
+      e.printStackTrace();
+      }
+      }
+      }
+
+Problems:
+
+      Lots of boilerplate code.
+      Easy to forget closing resources, causing resource leaks.
+      Code becomes harder to read.
+
+Java 7 introduced try-with-resources to solve this.
+
+      How does it close resources automatically?
+      
+      try (BufferedReader br =
+      new BufferedReader(new FileReader("test.txt"))) {
+      
+          System.out.println(br.readLine());
+      }
+      catch (IOException e) {
+      e.printStackTrace();
+      }
+
+      When execution leaves the try block—whether normally or because of an exception—Java automatically calls:
+
+      br.close();
+
+      You can think of it as the compiler generating something similar to:
+
+      BufferedReader br = new BufferedReader(new FileReader("test.txt"));
+      
+      try {
+      System.out.println(br.readLine());
+      } finally {
+      if (br != null) {
+      br.close();
+      }
+      }
+
+So even if an exception occurs, the resource is still closed.
+
+What interface must a resource implement?
+
+The resource must implement:
+
+      AutoCloseable
+
+AutoCloseable contains one method:
+
+      public interface AutoCloseable {
+      void close() throws Exception;
+      }
+
+Any class implementing this interface can be used in try-with-resources.
+
+Example:
+
+      class MyResource implements AutoCloseable {
+      
+          @Override
+          public void close() {
+              System.out.println("Resource closed");
+          }
+      }
+
+Usage:
+
+      try (MyResource r = new MyResource()) {
+      System.out.println("Using resource");
+      }
+
+Output:
+
+Using resource
+Resource closed

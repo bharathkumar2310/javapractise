@@ -1051,3 +1051,20 @@ Interface utility breaks ❌
         default	                public only
         static	                public, private
         private	                allowed (helper methods only)
+
+
+interface A {
+
+    void m1();              // public abstract (implicit)
+
+    default void m2() { }   // default
+
+    static void m3() { }    // static
+
+    private void m4() { }   // private (Java 9+)
+}
+
+
+All interface variables are implicitly:
+
+public static final

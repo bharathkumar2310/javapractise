@@ -185,6 +185,35 @@ Result: No increments are lost — atomicity is preserved.
         No deadlocks
         Since threads never wait for a lock, deadlocks are impossible.
 
+
+        How Java solves ABA
+        
+        Java provides:
+        
+        👉 AtomicStampedReference
+        
+        It adds a version number (stamp).
+        
+        Instead of just value:
+        value = 5
+        
+        It stores:
+        
+        (value = 5, stamp = 1)
+        Now CAS becomes:
+        compare BOTH:
+        value == 5 AND stamp == 1
+        
+        If value changes:
+        
+        5 → 7 → 5
+        stamp → 1 → 2 → 3
+        
+        Now CAS fails because stamp changed.
+
+    AtomicStampedReference<Integer> ref =
+    new AtomicStampedReference<>(5, 0);
+
 ```java
 import java.util.concurrent.atomic.AtomicInteger;
 

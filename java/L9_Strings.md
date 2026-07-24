@@ -553,3 +553,28 @@ String c = a + b;
 Compiler treats them as compile-time constants
 "HelloWorld" placed in string pool
 ✅ No new object
+
+
+
+Case 1: null reference
+String s = null;
+
+Memory state:
+
+s → null (no heap object)
+
+
+Does intern() create a new object?
+      
+      If not present → YES, SCP entry is created
+      If already present → NO new object created 
+      And changes reference to scp
+
+
+
+🔥 What happens in sb.toString()?
+      
+      StringBuilder sb = new StringBuilder("hello");
+      String s = sb.toString();
+      
+      👉 This creates a NEW String object in the heap, not a literal.

@@ -110,6 +110,11 @@ They enable frameworks to:
 ![img_5.png](../Images/AnnotExam6.png)
 
 
+Heap Pollution :
+
+    stringLists has type List<String>[].
+
+
 **_META ANNOTATIONS:_**
 
 ---> These are annotations used on top of another annotations

@@ -912,3 +912,130 @@ Worker thread calls condition.awaitNanos(remainingDelay)
 If a new task arrives with an earlier execution time, the thread is signaled to wake up
 
 This is called leader-follower pattern
+
+
+
+        1. CPU-bound tasks
+        
+        Example:
+        
+        Image processing
+        Encryption
+        Calculations
+        Sorting
+        
+        Tasks spend most of their time using the CPU.
+        
+        For CPU-bound work:
+        
+        Threads ≈ Number of CPU cores
+        
+        If your machine has:
+        
+        8 cores
+        
+        Use roughly:
+        
+        8–9 threads
+        
+        Why?
+        
+        If you create:
+        
+        100 threads
+        
+        only 8 can run simultaneously. The rest wait and cause context switching overhead.
+        
+        2. I/O-bound tasks
+        
+        Example:
+        
+        database.query();
+        httpClient.call();
+        readFile();
+        
+        Most of the time the thread is waiting.
+        
+        In this case, you can have more threads than cores.
+        
+        A commonly cited formula is:
+        
+       Nthreads=Ncores×(1+(W/C))
+        
+        Where:
+        
+        Ncores = CPU cores
+        W = wait time
+        C = compute time
+        Example
+        
+        8-core machine.
+        
+        A request spends:
+        
+        90 ms waiting for DB
+        10 ms CPU work
+        
+        So:
+        
+        W/C = 90/10 = 9
+        
+        Threads:
+        
+        8 × (1 + 9)
+        = 80
+        
+        Approximately 80 threads.
+        
+        3. Virtual threads
+        
+        For virtual threads, this calculation changes dramatically.
+        
+        Executors.newVirtualThreadPerTaskExecutor()
+        
+        Because virtual threads are cheap.
+        
+        Instead of:
+        
+        100 platform threads
+        
+        you might have:
+        
+        100,000 virtual threads
+        
+        The JVM parks them when they wait for I/O.
+        
+        The limiting factor becomes:
+        
+        Database connections
+        Memory
+        External service capacity
+        
+        rather than thread count.
+        
+        4. Real-world approach
+        
+        Most teams don't calculate exactly.
+        
+        They:
+        
+        Start with a reasonable number.
+        Load test.
+        Measure:
+        CPU utilization
+        Queue length
+        Response time
+        Throughput
+        Adjust.
+        
+        Example:
+        
+        CPU = 20%
+        Queue growing
+        
+        → Increase threads.
+        
+        CPU = 100%
+        Context switching high
+        
+        → Reduce threads.

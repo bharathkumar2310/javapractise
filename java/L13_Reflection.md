@@ -257,3 +257,9 @@ Because Spring doesn't know your class at compile time.
 ![img_3.png](../Images/ref11.png)
 
 ![img_4.png](../Images/ref12.png)
+
+
+.class file
+├── Metadata ---> COmpiler created
+└── Bytecode
+

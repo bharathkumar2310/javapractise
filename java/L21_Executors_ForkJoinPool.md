@@ -65,6 +65,18 @@ public class SynchronousQueueExample {
 | `newWorkStealingPool()`                    | `ForkJoinPool`                                                      | Uses multiple threads, tasks can be split (if RecursiveTask), work-stealing enabled, ideal for CPU-bound parallelism | 1. Parallel processing of large collections<br>2. CPU-heavy computations like matrix multiplication<br>3. Recursive divide-and-conquer algorithms like mergesort or parallel search         |
 
 
+Executors.newCachedThreadPool() creates a thread pool that:
+
+    Creates new threads when needed.
+    Reuses idle threads if available.
+    Has 0 core threads.
+    Can grow up to Integer.MAX_VALUE threads (practically unlimited).
+    Removes idle threads after 60 seconds.
+
+Why "Cached"?
+
+    Because it "caches" (keeps) idle threads for reuse.
+
 
 ![img.png](../Images/Executors1.png)
 

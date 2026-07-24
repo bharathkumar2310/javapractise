@@ -116,6 +116,13 @@ So **type erasure makes it impossible for generics to work with primitives.**
 👉 **This is the REAL root cause.**
 
 
+Below is an example of backward compatiblity this is hwy type erasure exists
+
+      Before Generics (Java 1.4)
+      List list = new ArrayList();
+      list.add("Hello");
+      String s = (String) list.get(0);
+
 
 
 
@@ -1202,3 +1209,42 @@ setter
 | Caching     | ❌ No                    | ✔ Yes (-128 to 127)                             |
 | Performance | Slightly faster         | Slightly slower (object creation if not cached) |
 | Usage       | When you need primitive | When you need object (collections, APIs)        |
+
+
+Primitive
+
+      int x = 10;
+
+Memory looks roughly like:
+      
+      x
+      ↓
+      10
+
+Only the integer value is stored.
+
+An int takes:
+
+      4 bytes
+
+Wrapper
+
+      Integer x = Integer.valueOf(10);
+
+Memory looks roughly like:
+
+Reference x
+↓
++------------------+
+| Object Header    |
+| int value = 10   |
++------------------+
+
+Now you have:
+
+      Reference variable
+         Object header
+      Actual int value
+         Alignment/padding
+
+So it occupies significantly more memory than 4 bytes.

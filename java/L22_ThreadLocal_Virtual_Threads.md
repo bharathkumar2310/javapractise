@@ -165,6 +165,29 @@ void serviceMethod() throws SQLException {
 ![img_3.png](../Images/ThreadLocal4.png)
 
 
+Every Thread has a field like:
+      
+      class Thread {
+      ThreadLocalMap threadLocals;
+      }
+   
+Think of it as:
+
+Thread-1
+      
+      threadLocals
+      {
+      userThreadLocal      -> "bharath",
+      requestIdThreadLocal -> 123
+      }
+      
+      Thread-2
+      threadLocals
+      {
+      userThreadLocal      -> "john",
+      requestIdThreadLocal -> 456
+      }
+
 
 🔥 Real Use Case (Very Important)
 🧾 Example: User Request in Web App
@@ -203,13 +226,15 @@ static String currentUser;
 Thread A sets "User1"
 Thread B sets "User2"
 Now both threads see wrong values ❌
-✅ With ThreadLocal (Clean Solution)
-static ThreadLocal<String> currentUser = new ThreadLocal<>();
-// Controller
-currentUser.set("User1");
 
-// Anywhere in same thread
-String user = currentUser.get();
+✅ With ThreadLocal (Clean Solution)
+      
+      static ThreadLocal<String> currentUser = new ThreadLocal<>();
+      // Controller
+      currentUser.set("User1");
+      
+      // Anywhere in same thread
+      String user = currentUser.get();
 
 ✔ No need to pass parameter
 ✔ No data conflict
@@ -218,15 +243,15 @@ String user = currentUser.get();
 🧠 What happens internally?
 
 Each thread has:
-
-Thread
-└── ThreadLocalMap
-├── ThreadLocal → value
-
-👉 So:
-
-Thread A → User1
-Thread B → User2
+      
+      Thread
+      └── ThreadLocalMap
+      ├── ThreadLocal → value
+      
+      👉 So:
+      
+      Thread A → User1
+      Thread B → User2
 
 They never collide.
 
@@ -432,3 +457,322 @@ These OS threads are then used as carrier threads
         
         No blocking at OS level
         Massive scalability
+
+
+
+1. What is ThreadLocal?
+
+         ThreadLocal provides a separate copy of a variable for each thread.
+         
+         Normally:
+         
+            class Counter {
+            int count = 0;
+            }
+         
+         If multiple threads access count, they share the same variable.
+         With ThreadLocal:
+         ThreadLocal<Integer> count = ThreadLocal.withInitial(() -> 0);
+         Each thread gets its own value.
+
+2. How is it stored internally?
+
+Interview answer:
+
+      Every Thread object contains a ThreadLocalMap.
+      When you call threadLocal.set(value), the value is stored in the current thread's ThreadLocalMap.
+      
+      Key = ThreadLocal object
+      Value = actual data
+      
+      Conceptually:
+            
+            Thread-1
+            ThreadLocalMap
+            UserContext -> John
+            
+            Thread-2
+            ThreadLocalMap
+            UserContext -> Alice
+      
+      Same ThreadLocal object.
+
+Different values.
+
+3. Why not use a normal static variable?
+
+Example:
+
+      public class UserContext {
+      
+          static String user;
+      }
+
+      Request 1:
+      
+      user = "John";
+      
+      Request 2:
+      
+      user = "Alice";
+      
+      Both requests overwrite each other.
+      
+      Race condition.
+      
+      With ThreadLocal:
+      
+      ThreadLocal<String> user = new ThreadLocal<>();
+      user.set("John");
+      
+      and
+      
+      user.set("Alice");
+      
+      are isolated.
+
+4. Real-world Spring Boot use case
+
+         Authentication context.
+         Suppose a request arrives.
+         POST /transfer
+         
+         User:
+         
+         bharath
+         
+         Filter extracts user.
+         
+         UserContext.setCurrentUser("bharath");
+         
+         Service layer:
+         
+         transferMoney();
+         
+         Deep inside:
+         
+         auditService.log();
+         
+         Audit service can get current user without passing it through 20 method calls.
+         
+         UserContext.getCurrentUser();
+         
+         using ThreadLocal.
+         
+         Without ThreadLocal:
+         
+         controller(user)
+         -> service(user)
+         -> repository(user)
+         -> audit(user)
+         
+         You must pass user everywhere.
+         
+         Messy.
+5. Why must we remove ThreadLocal?
+
+         Application servers use thread pools.
+         Thread-1 handles Request A
+         Thread-1 handles Request B
+         If you don't clear:
+      
+         threadLocal.remove();
+         Request B may see Request A's data.
+      
+         Example:
+      
+         User = John
+      
+         stored.
+      
+         Thread returned to pool.
+      
+         Next request:
+      
+         User = Alice
+      
+         Same thread reused.
+      
+         If not removed:
+      
+         Alice's request sees John
+      
+         Bad bug.
+      
+         Therefore:
+      
+         try {
+         threadLocal.set(user);
+         process();
+         }
+         finally {
+         threadLocal.remove();
+         }
+ 6. What are Virtual Threads?
+
+         Introduced in Java 21.
+   
+         Traditional thread:
+   
+         Thread.ofPlatform()
+   
+         Virtual thread:
+   
+         Thread.ofVirtual()
+   
+         or
+   
+         Executors.newVirtualThreadPerTaskExecutor();
+
+7. Why were Virtual Threads created?
+
+       Platform threads map roughly to OS threads.
+       OS threads are expensive.
+       Creating 100,000 OS threads is difficult.
+       Virtual threads are lightweight.
+   
+       You can create:
+   
+          1 million virtual threads
+   
+       much more easily.
+
+ 8. Why do people say Virtual Threads are managed by JVM?
+
+         Platform thread:
+   
+         Java Thread
+         ↓
+         OS Thread
+   
+         OS scheduler decides when it runs.
+   
+         Virtual thread:
+   
+         Virtual Thread
+         ↓
+         JVM Scheduler
+         ↓
+         Few OS Threads
+   
+         The JVM schedules many virtual threads onto a smaller set of OS threads.
+   
+         This is why people say:
+   
+         Virtual Threads are managed by the JVM.
+
+9. ThreadLocal with Virtual Threads
+
+       Works normally.
+   
+       ThreadLocal<String> user = new ThreadLocal<>();
+       Thread.startVirtualThread(() -> {
+       user.set("John");
+       });
+   
+       No problem.
+   
+       Each virtual thread gets its own ThreadLocalMap.
+
+10. Why can ThreadLocal become problematic with Virtual Threads?
+
+         Suppose: 100000 virtual threads
+      
+         Each has:
+      
+         ThreadLocal<User>
+      
+         Now you have:
+      
+         100000 copies
+      
+         of data.
+      
+         Memory usage can become large.
+      
+         Also, some frameworks historically assumed a small number of threads and stored lots of context in ThreadLocals.
+      
+         With virtual threads, that assumption may no longer hold.
+
+11. Interview Question: Does ThreadLocal break with Virtual Threads?
+
+Answer:
+
+      No.
+      
+      ThreadLocal works correctly with Virtual Threads.
+      
+      However, excessive use of ThreadLocal can increase memory usage because every virtual thread maintains its own ThreadLocal values.
+
+12. Most likely interview question
+
+Q: Difference between Platform Thread and Virtual Thread?
+
+| Platform Thread     | Virtual Thread     |
+| ------------------- | ------------------ |
+| Backed by OS thread | Managed by JVM     |
+| Expensive           | Lightweight        |
+| Thousands possible  | Millions possible  |
+| Higher memory usage | Lower memory usage |
+| OS scheduler        | JVM scheduler      |
+
+
+Platform Threads vs Virtual Threads — Summary
+
+A platform thread is backed by a real OS thread. When a platform thread is created, the operating system allocates a dedicated native stack for it inside the JVM process's memory space. 
+This stack stores the thread's local variables, method calls, and execution state. Because every platform thread requires its own OS-managed stack and kernel resources, creating and managing large numbers of platform threads is expensive.
+A virtual thread also has its own logical stack, but it is managed by the JVM rather than the operating system. 
+Instead of allocating a dedicated native stack for every virtual thread, the JVM stores the virtual thread's stack frames and execution state in JVM-managed memory and schedules many virtual threads onto a small pool of OS threads called carrier threads. 
+When a virtual thread blocks (for example, during I/O or sleep), the JVM saves its state, detaches it from the carrier thread, and allows that carrier thread to run other virtual threads. 
+This enables applications to create millions of virtual threads with much lower memory and scheduling overhead than platform threads. 
+
+
+
+    List<Thread> threads = new ArrayList<>();
+    
+    for(int i=0; i<1000; i++) {
+        Thread vt = Thread.ofVirtual().start(() ->       // Thread vt = Thread.startVirtualThread(() -> {
+                System.out.println("hello" + Thread.currentThread())
+        );
+        threads.add(vt);
+    }
+
+
+    for(Thread th : threads) {
+        th.join();
+    }
+
+    List<Thread> threads = new ArrayList<>();
+
+    for(int i=0; i<1000; i++) {
+        Thread vt = Thread.startVirtualThread(() -> {
+            System.out.println("Running");
+        });
+        threads.add(vt);
+    }
+
+
+    for(Thread th : threads) {
+        th.join();
+    }
+
+
+
+
+    var executor = Executors.newVirtualThreadPerTaskExecutor();
+    List<Future<String>> futureStrings = new ArrayList<>();
+    for(int i=0; i<1000; i++) {
+        Future<String> s = executor.submit(() -> {
+            return "I am " + Thread.currentThread() ;
+        }
+        );
+        futureStrings.add(s);
+    }
+
+
+    for(Future<String> s : futureStrings) {
+        System.out.println(s.get());
+    }
+
+
+

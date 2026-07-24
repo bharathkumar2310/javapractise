@@ -1,46 +1,46 @@
-                JVM
-                │
-    ┌───────────┴───────────┐
+                    JVM
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+    Class Loader          Runtime Data Areas
+    Subsystem                   │
     │                       │
-Class Loader          Runtime Data Areas
-Subsystem                   │
-│                       │
-│               ┌───────┴────────┐
-│               │                │
-│             Heap            Method Area
-│               │                │
-│             Stack          Metaspace
-│
-└──────────────→ Execution Engine
-│
-┌─────┼─────┐
-│     │     │
-Interpreter JIT  GC
-│
-Code Cache
+    │               ┌───────┴────────┐
+    │               │                │
+    │             Heap            Method Area
+    │               │                │
+    │             Stack          Metaspace
+    │
+    └──────────────→ Execution Engine
+    │
+    ┌─────┼─────┐
+    │     │     │
+    Interpreter JIT  GC
+    │
+    Code Cache
 
 
 
-JVM Memory
-│
-├── Heap (Shared)
-│     ├── Young Gen (Eden + S0 + S1)
-│     ├── Old Gen
-│     └── String Pool
-│
-├── Method Area (Shared)
-│     ├── Class Metadata
-│     ├── Method Metadata
-│     ├── Static Variables
-│     ├── Runtime Constant Pool
-│     └── Bytecode
-│
-├── Stack (Per Thread)
-│     └── Stack Frames
-│
-├── PC Register (Per Thread)
-│
-└── Native Method Stack
+    JVM Memory
+    │
+    ├── Heap (Shared)
+    │     ├── Young Gen (Eden + S0 + S1)
+    │     ├── Old Gen
+    │     └── String Pool
+    │
+    ├── Method Area (Shared)
+    │     ├── Class Metadata
+    │     ├── Method Metadata
+    │     ├── Static Variables
+    │     ├── Runtime Constant Pool
+    │     └── Bytecode
+    │
+    ├── Stack (Per Thread)
+    │     └── Stack Frames
+    │
+    ├── PC Register (Per Thread)
+    │
+    └── Native Method Stack
 
 ![img.png](../Images/Memory.png)
 

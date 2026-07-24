@@ -89,4 +89,10 @@ Day 26 — Sorting + Searching (binary search patterns)
 Day 27 — System Design Basics (LLD style questions in Java)
 Day 28 — Coding + OOP combined interview questions
 Day 29 — HR + Scenario-based + Debugging round
-Day 30 — Full Mock Interview (Java + Coding + Design)
+Day 30 — Full Mock (Java + Coding + Design)
+
+
+
+File Handling + Serialization
+Records
+Concurrent Collections
