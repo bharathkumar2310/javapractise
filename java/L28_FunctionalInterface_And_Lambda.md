@@ -69,6 +69,37 @@ LAMBDA EXPRESSION :
         No return type declaration
         Short syntax  
 
+
+Works only with a functional interface (an interface with exactly one abstract method).
+
+Example:
+
+        Runnable r = () -> {
+        System.out.println("Hello");
+        };
+
+Equivalent to:
+
+        Runnable r = new Runnable() {
+        @Override
+        public void run() {
+        System.out.println("Hello");
+        }
+        };
+
+The lambda is much shorter.
+
+
+| Feature                   | Lambda Expression           | Anonymous Inner Class              |
+| ------------------------- | --------------------------- | ---------------------------------- |
+| Introduced                | Java 8                      | Java 1.1                           |
+| Syntax                    | Short and concise           | Verbose                            |
+| Used for                  | Functional interfaces (SAM) | Any interface or abstract class    |
+| `this` refers to          | Enclosing class             | Anonymous class itself             |
+| Can define fields/methods | ❌ No                        | ✅ Yes                              |
+| Performance               | Generally lighter           | Creates a separate anonymous class |
+
+
 ![img.png](../Images/FI3.png)
 
 ![img_1.png](../Images/FI4.png)
@@ -159,3 +190,91 @@ What if 2 interfaces have same default method?
     
     No. Normal classes cannot have default methods.
     default is a keyword only allowed inside interfaces
+
+
+1. Functional Interface
+
+        Definition:
+        A functional interface is an interface with exactly one abstract method.
+        
+        Example:
+        
+        @FunctionalInterface
+        interface Calculator {
+        int add(int a, int b);
+        }
+Why do we need it?
+
+        Before Java 8, if you wanted to pass behavior (logic) to a method, you had to create an anonymous class.
+        
+        Example:
+        
+        Collections.sort(list, new Comparator<Integer>() {
+        @Override
+        public int compare(Integer a, Integer b) {
+        return a - b;
+        }
+        });
+
+This is verbose.
+
+    A functional interface provides a target type for a lambda expression.
+
+2. Lambda Expression
+
+Definition:
+    
+    A lambda expression is a concise way to implement a functional interface.
+    
+    Instead of:
+    
+    Comparator<Integer> c = new Comparator<Integer>() {
+    @Override
+    public int compare(Integer a, Integer b) {
+    return a - b;
+    }
+    };
+
+we write:
+
+    Comparator<Integer> c = (a, b) -> a - b;
+Why do we need lambdas?
+    
+    Less boilerplate code.
+    Improves readability.
+    Lets us pass behavior as data.
+    Makes APIs like Streams much cleaner.
+
+Think of it as:
+
+    Functional Interface = contract
+    Lambda = implementation of that contract
+
+3. Streams
+
+    Streams let you process collections in a declarative way.
+
+Without streams:
+
+    List<Integer> ans = new ArrayList<>();
+    
+    for (Integer x : list) {
+    if (x % 2 == 0) {
+    ans.add(x * x);
+    }
+    }
+
+With streams:
+
+    List<Integer> ans = list.stream()
+    .filter(x -> x % 2 == 0)
+    .map(x -> x * x)
+    .toList();
+
+Why do we need streams?
+    
+    Avoid explicit loops.
+    Express what you want rather than how to do it.
+    Improve readability for collection processing.
+    Support operations like filter, map, reduce, sorted, distinct, etc.
+    Can leverage parallel processing with parallelStream() when appropriate.

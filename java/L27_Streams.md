@@ -62,6 +62,10 @@ Problems:
 
 Much shorter and cleaner.
 
+
+
+
+
 4️⃣ Major Uses of Streams
 1. Filtering Data
 
@@ -231,6 +235,232 @@ This makes Streams very memory efficient.
 ![img.png](../Images/StreamCreation1.png)
 
 ![img_1.png](../Images/StreamCreation2.png)
+
+
+
+1. Primitive Streams
+
+Normally, a stream stores objects.
+
+      Stream<Integer>
+      Stream<Long>
+      Stream<Double>
+
+But Java has primitive types:
+
+      int
+      long
+      double
+
+If we use Stream<Integer>, every int is boxed into an Integer.
+
+      5  → Integer(5)
+      6  → Integer(6)
+
+This boxing/unboxing has some overhead.
+
+To avoid that, Java provides specialized primitive streams:
+
+      IntStream
+      LongStream
+      DoubleStream
+
+These work directly with primitives.
+
+Example
+
+Instead of
+
+      Stream<Integer> stream = Stream.of(1, 2, 3);
+
+we can write
+
+      IntStream stream = IntStream.of(1, 2, 3);
+      
+      No boxing happens.
+
+range()
+      
+      IntStream.range(1, 5)
+      .forEach(System.out::println);
+
+Output
+
+      1
+      2
+      3
+      4
+
+Notice:
+
+Ending value is excluded.
+
+Think of it like a for loop:
+
+      for(int i = 1; i < 5; i++)
+rangeClosed()
+      
+      IntStream.rangeClosed(1, 5)
+      .forEach(System.out::println);
+
+Output
+
+      1
+      2
+      3
+      4
+      5
+
+Equivalent to
+
+      for(int i = 1; i <= 5; i++)
+      Sum
+      
+      Instead of
+      
+      int sum = 0;
+      
+      for(int i = 1; i <= 100; i++)
+      sum += i;
+      
+      Use
+      
+      int sum = IntStream.rangeClosed(1, 100)
+      .sum();
+      Average
+      OptionalDouble avg =
+      IntStream.of(10, 20, 30)
+      .average();
+      Max
+      OptionalInt max =
+      IntStream.of(3, 8, 2, 10)
+      .max();
+      Convert to Stream<Integer>
+      
+      Sometimes an API expects Stream<Integer>.
+
+         Stream<Integer> stream =
+         IntStream.range(1, 5)
+         .boxed();
+
+boxed() converts
+
+      int
+      
+      to
+      
+      Integer
+2. Streams from String
+
+There are two common ways.
+
+(A) Character Stream
+String s = "JAVA";
+
+      IntStream stream = s.chars();
+
+Why IntStream?
+
+      Because Java stores characters internally as Unicode code points.
+
+Output
+
+      74
+      65
+      86
+      65
+
+These are ASCII/Unicode values.
+
+Convert back to characters
+      
+      s.chars()
+      .mapToObj(c -> (char) c)
+      .forEach(System.out::println);
+
+Output
+
+      J
+      A
+      V
+      A
+
+Count vowels
+      
+      long count =
+      s.chars()
+      .filter(c ->
+      "AEIOUaeiou".indexOf(c) != -1)
+      .count();
+
+(B) Word Stream
+
+Suppose
+
+      String sentence =
+      "Java Spring Boot";
+
+Split first.
+
+      Stream<String> stream =
+      Arrays.stream(sentence.split(" "));
+      
+      Now stream contains
+      
+      Java
+      Spring
+      Boot
+      
+      Example
+      
+      Arrays.stream(sentence.split(" "))
+      .forEach(System.out::println);
+
+Output
+
+      Java
+      Spring
+      Boot
+
+Convert words to uppercase
+      
+      Arrays.stream(sentence.split(" "))
+      .map(String::toUpperCase)
+      .forEach(System.out::println);
+
+Output
+
+      JAVA
+      SPRING
+      BOOT
+
+Interview examples
+      
+      Sum of even numbers
+      int sum =
+      IntStream.rangeClosed(1, 10)
+      .filter(x -> x % 2 == 0)
+      .sum();
+      Count digits in a string
+      long count =
+      "abc123xyz".chars()
+      .filter(Character::isDigit)
+      .count();
+      Count words
+      long words =
+      Arrays.stream(sentence.split(" "))
+      .count();
+      Interview summary
+      Primitive Stream	Purpose
+      IntStream	Stream of int values (avoids boxing)
+      LongStream	Stream of long values
+      DoubleStream	Stream of double values
+      range()	Start inclusive, end exclusive
+      rangeClosed()	Both ends inclusive
+      boxed()	Converts primitive stream to object stream
+      String Stream	Purpose
+      chars()	Produces an IntStream of character Unicode values
+      Arrays.stream(str.split(" "))	Produces a Stream<String> of words
 
 1️⃣ What Happens When You Call Intermediate Operations
 
@@ -735,3 +965,609 @@ mapToInt() is better when working with numbers
 | **Empty groups**     | Always present (`true` & `false`) | Only created if data exists             |
 | **Flexibility**      | Limited                           | Very flexible                           |
 | **Performance**      | Slightly optimized for 2 groups   | General-purpose                         |
+
+
+1. reduce()
+
+Think of it as repeatedly combining elements until only one result remains.
+
+Example:
+
+1 2 3 4
+
+Reduce with addition:
+
+1 + 2 = 3
+3 + 3 = 6
+6 + 4 = 10
+
+Final answer:
+
+10
+Syntax 1
+Optional<T> reduce(BinaryOperator<T> accumulator)
+
+Example:
+
+Optional<Integer> sum =
+Stream.of(1, 2, 3, 4)
+.reduce((a, b) -> a + b);
+
+System.out.println(sum.get());
+Execution
+a=1 b=2 → 3
+
+a=3 b=3 → 6
+
+a=6 b=4 → 10
+Syntax 2 (Identity)
+T reduce(T identity,
+BinaryOperator<T> accumulator)
+
+Example:
+
+int sum =
+Stream.of(1, 2, 3, 4)
+.reduce(0, (a, b) -> a + b);
+
+Execution:
+
+0 + 1 = 1
+1 + 2 = 3
+3 + 3 = 6
+6 + 4 = 10
+
+Output:
+
+10
+
+The identity is the initial value.
+
+Product
+int product =
+Stream.of(2, 3, 4)
+.reduce(1, (a, b) -> a * b);
+
+Execution:
+
+1 * 2 = 2
+2 * 3 = 6
+6 * 4 = 24
+
+
+
+1. To a Collection ⭐⭐⭐⭐⭐
+   Collectors.toList()
+   Collectors.toSet()
+   Collectors.toCollection(ArrayList::new)
+
+Example:
+
+List<String> list =
+names.stream()
+.collect(Collectors.toList());
+
+Think:
+
+Collect into a collection.
+
+2. To a Map ⭐⭐⭐⭐⭐
+   Collectors.toMap()
+
+Example:
+
+Map<Integer, String> map =
+employees.stream()
+.collect(Collectors.toMap(
+Employee::getId,
+Employee::getName
+));
+
+Think:
+
+Convert objects into key-value pairs.
+
+3. Grouping ⭐⭐⭐⭐⭐
+   Collectors.groupingBy()
+
+Example:
+
+Map<String, List<Employee>> map =
+employees.stream()
+.collect(
+Collectors.groupingBy(
+Employee::getDepartment
+));
+
+Result:
+
+IT
+Ram
+John
+
+HR
+Alice
+
+Think:
+
+Put similar things into buckets.
+
+4. Partitioning ⭐⭐⭐⭐
+
+Only 2 groups.
+
+Collectors.partitioningBy()
+
+Example:
+
+Map<Boolean, List<Integer>> map =
+list.stream()
+.collect(
+Collectors.partitioningBy(
+n -> n % 2 == 0
+));
+
+Result:
+
+true
+2 4 6
+
+false
+1 3 5
+
+Think:
+
+True bucket and False bucket.
+
+5. Joining ⭐⭐⭐⭐
+
+For Strings.
+
+Collectors.joining()
+
+Example:
+
+String s =
+Stream.of("Java", "Spring", "Boot")
+.collect(Collectors.joining("-"));
+
+Output
+
+Java-Spring-Boot
+
+Think:
+
+Merge strings together.
+
+6. Statistics ⭐⭐⭐⭐
+   counting()
+   summingInt()
+   averagingInt()
+   maxBy()
+   minBy()
+   summarizingInt()
+
+Example
+
+int total =
+employees.stream()
+.collect(
+Collectors.summingInt(Employee::getSalary)
+);
+
+Average
+
+double avg =
+employees.stream()
+.collect(
+Collectors.averagingInt(Employee::getSalary)
+);
+
+Think:
+
+Calculate numbers.
+
+The only ones interviewers usually expect
+toList()
+toSet()
+toMap()
+
+groupingBy()
+
+partitioningBy()
+
+joining()
+
+counting()
+
+summingInt()
+
+averagingInt()
+
+mapping()   (occasionally)
+
+That's enough for most backend interviews.
+
+Memory Trick
+Collectors
+
+│
+├── Collection
+│     ├── toList()
+│     ├── toSet()
+│     └── toCollection()
+│
+├── Map
+│     └── toMap()
+│
+├── Group
+│     ├── groupingBy()
+│     └── partitioningBy()
+│
+├── String
+│     └── joining()
+│
+└── Statistics
+├── counting()
+├── summingInt()
+├── averagingInt()
+├── maxBy()
+└── minBy()
+
+
+
+1. Method References (Most common)
+   Map<Integer, String> map =
+   employees.stream()
+   .collect(Collectors.toMap(
+   Employee::getId,
+   Employee::getName
+   ));
+2. Lambda Expressions
+
+Exactly the same logic.
+
+Map<Integer, String> map =
+employees.stream()
+.collect(Collectors.toMap(
+e -> e.getId(),
+e -> e.getName()
+));
+3. Store the Entire Object
+
+Instead of mapping to the name:
+
+Map<Integer, Employee> map =
+employees.stream()
+.collect(Collectors.toMap(
+Employee::getId,
+e -> e
+));
+
+Result:
+
+1 -> Employee(...)
+2 -> Employee(...)
+
+
+
+Group by Age
+Map<Integer, List<Employee>> map =
+employees.stream()
+.collect(Collectors.groupingBy(Employee::getAge));
+
+Result
+
+23
+Ram
+John
+
+25
+Alice
+Group and Count
+
+Suppose you only want the number of employees in each department.
+
+Map<String, Long> map =
+employees.stream()
+.collect(
+Collectors.groupingBy(
+Employee::getDepartment,
+Collectors.counting()
+));
+
+Output
+
+IT -> 2
+HR -> 2
+Finance -> 1
+Group and Sum Salary
+Map<String, Integer> map =
+employees.stream()
+.collect(
+Collectors.groupingBy(
+Employee::getDepartment,
+Collectors.summingInt(Employee::getSalary)
+));
+
+Output
+
+IT -> 120000
+
+HR -> 80000
+Group and Average Salary
+Map<String, Double> map =
+employees.stream()
+.collect(
+Collectors.groupingBy(
+Employee::getDepartment,
+Collectors.averagingInt(Employee::getSalary)
+));
+
+Output
+
+IT -> 60000
+
+HR -> 40000
+
+
+groupingBy() → many groups
+partitioningBy() → exactly 2 groups (true and false)
+
+
+
+Example
+
+Suppose you have:
+
+List<Integer> list = List.of(1,2,3,4,5,6);
+
+Now partition into even and odd numbers.
+
+Map<Boolean, List<Integer>> map =
+list.stream()
+.collect(Collectors.partitioningBy(n -> n % 2 == 0));
+
+Result:
+
+true
+[2,4,6]
+
+false
+[1,3,5]
+
+Notice the keys are always:
+
+true
+false
+Compare with groupingBy()
+Collectors.groupingBy(n -> n % 2 == 0)
+
+also produces:
+
+true
+false
+
+So why have partitioningBy()?
+
+Because Java knows there can only be two groups, making it simpler and optimized for boolean conditions.
+
+Employee Example
+
+Employees:
+
+Ram   60000
+John  40000
+Bob   80000
+
+Partition by salary > 50000
+
+Map<Boolean, List<Employee>> map =
+employees.stream()
+.collect(
+Collectors.partitioningBy(
+e -> e.getSalary() > 50000
+));
+
+Result
+
+true
+Ram
+Bob
+
+false
+John
+Count in Each Partition
+Map<Boolean, Long> map =
+employees.stream()
+.collect(
+Collectors.partitioningBy(
+e -> e.getSalary() > 50000,
+Collectors.counting()
+));
+
+Output
+
+true  -> 2
+false -> 1
+Sum Salary in Each Partition
+Map<Boolean, Integer> map =
+employees.stream()
+.collect(
+Collectors.partitioningBy(
+e -> e.getSalary() > 50000,
+Collectors.summingInt(Employee::getSalary)
+));
+
+Output
+
+true  -> 140000
+false -> 40000
+
+
+
+These are called downstream collectors. They are usually used with collect() or inside groupingBy()/partitioningBy().
+
+Let's understand each one.
+
+1. counting()
+
+Counts the number of elements.
+
+long count = employees.stream()
+.collect(Collectors.counting());
+
+Equivalent to:
+
+long count = employees.stream().count();
+
+Output:
+
+5
+With groupingBy()
+Map<String, Long> map =
+employees.stream()
+.collect(Collectors.groupingBy(
+Employee::getDepartment,
+Collectors.counting()
+));
+
+Output
+
+IT -> 3
+HR -> 2
+2. summingInt()
+
+Adds integer values.
+
+Suppose
+
+Ram    50000
+John   60000
+Bob    40000
+int total =
+employees.stream()
+.collect(Collectors.summingInt(Employee::getSalary));
+
+Output
+
+150000
+With grouping
+Map<String,Integer> map =
+employees.stream()
+.collect(Collectors.groupingBy(
+Employee::getDepartment,
+Collectors.summingInt(Employee::getSalary)
+));
+
+Output
+
+IT -> 110000
+HR -> 40000
+3. averagingInt()
+
+Finds the average.
+
+double avg =
+employees.stream()
+.collect(Collectors.averagingInt(Employee::getSalary));
+
+Output
+
+50000
+
+Grouped:
+
+Map<String,Double> map =
+employees.stream()
+.collect(Collectors.groupingBy(
+Employee::getDepartment,
+Collectors.averagingInt(Employee::getSalary)
+));
+
+Output
+
+IT -> 55000
+
+HR -> 40000
+
+What is collectingAndThen()?
+
+It lets you:
+
+Collect the stream normally, and then
+Apply one final transformation to the collected result.
+
+Think of it as:
+
+Stream
+↓
+Collector
+↓
+Intermediate Result
+↓
+One Final Operation
+↓
+Final Result
+Syntax
+Collectors.collectingAndThen(
+downstreamCollector,
+finisher
+)
+downstreamCollector → How to collect the stream (toList(), toSet(), groupingBy(), etc.)
+finisher → A function applied to the collected result.
+Example 1: Make the List Unmodifiable
+
+Without collectingAndThen():
+
+List<String> list =
+names.stream()
+.collect(Collectors.toList());
+
+This list can be modified:
+
+list.add("Java"); // ✅
+
+With collectingAndThen():
+
+List<String> list =
+names.stream()
+.collect(Collectors.collectingAndThen(
+Collectors.toList(),
+Collections::unmodifiableList
+));
+
+Now:
+
+list.add("Java"); // ❌ UnsupportedOperationException
+Example 2: Get the Size of the Collected List
+int size =
+names.stream()
+.collect(Collectors.collectingAndThen(
+Collectors.toList(),
+List::size
+));
+
+Execution:
+
+Stream
+↓
+toList()
+↓
+["Java", "Spring", "Boot"]
+↓
+size()
+↓
+3
+Example 3: Sort After Collecting
+List<Integer> sorted =
+list.stream()
+.collect(Collectors.collectingAndThen(
+Collectors.toList(),
+l -> {
+Collections.sort(l);
+return l;
+}
+));
+
+First it collects into a list, then sorts that list.
