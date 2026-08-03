@@ -1,3 +1,47 @@
+
+JVM (Java Virtual Machine) :
+    
+    JVM executes Java programs by converting bytecode (.class files) into machine code using an interpreter and Just-In-Time (JIT) compiler.
+    JVM is responsible for:
+    Loading classes (Class Loader)
+    Verifying bytecode
+    Memory management (Heap, Stack, Method Area, etc.)
+    Garbage Collection (GC)
+    Executing bytecode
+    JVM is platform-dependent (Windows has a Windows JVM, Linux has a Linux JVM).
+    Java is platform-independent because the same bytecode can run on any JVM.
+
+JRE (Java Runtime Environment)
+
+    JRE = JVM + Core Libraries + Runtime Components
+
+It contains:
+
+    JVM
+    Java standard libraries (e.g., java.lang, java.util, java.io, Math)
+    Other runtime files required to run Java applications
+
+Purpose: Run Java applications.
+
+    JRE does not contain the Java compiler (javac).
+
+JDK (Java Development Kit)
+
+    JDK = JRE + Development Tools
+
+    It contains everything in the JRE plus tools like:
+    
+    javac (Java compiler)
+    java (launcher)
+    jdb (debugger)
+    javadoc
+    jar
+    jconsole
+    jps, jstack, jmap, etc.
+
+    Purpose: Develop, compile, debug, package, and run Java applications.
+
+
                     JVM
                     │
         ┌───────────┴───────────┐
@@ -590,6 +634,9 @@ JVM-level	Bytecode PC / Counter	Next bytecode instruction	Thread’s JVM data st
             That machine code goes into Code Cache
             Not the original OS code segment
 
+
+    The original bytecode is stored in the .class file on disk. When the class is loaded, the JVM parses it and creates an internal runtime representation. The class metadata—including method definitions and their bytecode—is maintained as part of the loaded class's metadata in Metaspace, while the corresponding java.lang.Class object resides on the heap. The Execution Engine uses this method bytecode for interpretation or JIT compilation.
+    the generated native machine code is stored in a special memory region called the Code Cache.
 
       ---> Data Segment contains the static and global variables of JVM executbblae(C/C++ code)
       
@@ -1843,3 +1890,2161 @@ Example libraries:
 Security providers
 Cryptography extensions (like JCE)
 XML parsers
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+# Class Loader in Java
+
+## What is a Class Loader?
+
+A **Class Loader** is a JVM component responsible for **loading Java classes (`.class` files)** into memory at runtime.
+
+- It loads the bytecode from the `.class` file.
+- Creates a `Class` object in memory.
+- Makes the class available for execution.
+- Classes are loaded **only when they are first needed** (Lazy Loading).
+
+> **Interview Definition:**
+>
+> A Class Loader is a JVM component responsible for loading Java bytecode (`.class` files) into JVM memory during runtime.
+
+---
+
+# Why Do We Need a Class Loader?
+
+Imagine a project with **10,000 classes**.
+
+If JVM loaded all classes when the application starts:
+
+- Startup would be very slow.
+- Huge amount of memory would be consumed.
+- Many classes might never be used.
+
+Instead, JVM uses **Lazy Loading**.
+
+A class is loaded **only when it is referenced for the first time.**
+
+Example:
+
+```java
+public class Main {
+
+    public static void main(String[] args) {
+
+        Student s = new Student();
+
+    }
+}
+```
+
+Execution:
+
+1. JVM loads `Main.class`.
+2. Starts executing `main()`.
+3. When `new Student()` is encountered,
+4. JVM loads `Student.class`.
+
+Student is **not loaded before it is needed.**
+
+---
+
+# Responsibilities of Class Loader
+
+A Class Loader is responsible for:
+
+- Loading `.class` files into memory.
+- Creating a `Class` object.
+- Delegating loading to parent class loaders.
+- Preventing duplicate loading.
+- Ensuring core Java classes are loaded safely.
+
+---
+
+# Types of Class Loaders
+
+Java mainly has **three built-in class loaders.**
+
+```
+Application Class Loader
+        ↑
+Platform Class Loader
+        ↑
+Bootstrap Class Loader
+```
+
+---
+
+# 1. Bootstrap Class Loader
+
+## Description
+
+Bootstrap Class Loader is the **parent of all class loaders.**
+
+It loads the core Java classes required by every Java program.
+
+Examples:
+
+```text
+java.lang.String
+java.lang.Object
+java.lang.System
+java.lang.Math
+java.util.ArrayList
+java.util.HashMap
+```
+
+### Characteristics
+
+- Written in Native Code (C/C++)
+- Part of JVM
+- Cannot be accessed directly from Java code
+- Loads classes from Java Runtime
+
+Example:
+
+```java
+String s = "Hello";
+```
+
+`String.class` is loaded by Bootstrap Class Loader.
+
+---
+
+# 2. Platform Class Loader
+
+(Extension Class Loader before Java 9)
+
+## Description
+
+Loads Java platform libraries that are not part of the core runtime but are part of the Java platform.
+
+Examples include packages for:
+
+    Database access (JDBC)
+    XML processing
+    Security
+    Cryptography
+    Naming and directory services
+
+Examples:
+
+```text
+java.sql.*
+javax.xml.*
+java.xml.*
+import java.sql.Connection;
+import java.sql.DriverManager;
+```
+
+---
+
+# 3. Application Class Loader
+
+## Description
+
+Loads classes from the application's classpath.
+
+These are your own classes.
+
+Example:
+
+```text
+Main
+Student
+Employee
+Spring Boot Controllers
+Spring Boot Services
+Repositories
+```
+
+Example:
+
+```java
+public class Student {
+}
+```
+
+Student.class is loaded by the Application Class Loader.
+
+---
+
+# Parent Delegation Model ⭐⭐⭐⭐⭐
+
+One of the most important interview topics.
+
+When a class needs to be loaded, the Application Class Loader **does not immediately load it itself.**
+
+Instead, it asks its parent.
+
+Flow:
+
+```
+Application
+      |
+      V
+Platform
+      |
+      V
+Bootstrap
+```
+
+Loading Process:
+
+1. Application Class Loader receives request.
+2. It asks Platform Class Loader.
+3. Platform asks Bootstrap.
+4. Bootstrap tries to load the class.
+5. If Bootstrap cannot find it,
+6. Platform tries.
+7. If Platform cannot find it,
+8. Application finally loads it.
+
+---
+
+# Why Parent Delegation?
+
+Suppose someone creates:
+
+```java
+package java.lang;
+
+public class String {
+
+}
+```
+
+
+
+Without Parent Delegation,
+this fake String class could replace the real String class.
+
+That would completely break Java.
+
+Because Bootstrap always gets the first chance,
+the original `java.lang.String` is always loaded.
+
+This makes Java secure.
+
+Q: Why can't we replace java.lang.String?
+
+    A: Because of the Parent Delegation Model. When a class is requested, the Application Class Loader first delegates the request to its parent loaders. The Bootstrap Class Loader loads the official java.lang.String from the JDK before the application can load any class with the same fully qualified name. Additionally, modern Java prevents user code from defining classes in java.* packages, providing another layer of protection.
+
+---
+
+# Class Loading Process
+
+The loading process consists of **three major phases.**
+
+```
+Loading
+    |
+    V
+Linking
+    |
+    |---- Verification
+    |---- Preparation
+    |---- Resolution
+    |
+    V
+Initialization
+```
+
+---
+
+# Phase 1 : Loading
+
+During loading:
+
+- JVM locates the `.class` file.
+- Reads bytecode.
+- Creates a `Class` object.
+
+Example:
+
+```
+Student.class
+      |
+      V
+Class<Student>
+```
+
+---
+
+# Phase 2 : Linking
+
+Linking consists of **three steps.**
+
+---
+
+## Verification
+
+Purpose:
+
+Ensures that the bytecode is valid.
+
+Checks include:
+
+- Illegal bytecode
+- Stack correctness
+- Variable initialization
+- Access rules
+- JVM format validation
+
+If verification fails,
+
+```
+java.lang.VerifyError
+```
+
+is thrown.
+
+---
+
+## Preparation
+
+Memory is allocated for **static variables.**
+
+Default values are assigned.
+
+Example:
+
+```java
+class Demo {
+
+    static int x = 100;
+
+}
+```
+
+During Preparation:
+
+```
+x = 0
+```
+
+Only default values are assigned.
+
+---
+
+## Resolution
+
+Symbolic references are replaced by actual memory references.
+
+Example:
+
+Before Resolution:
+
+```
+Student
+```
+
+After Resolution:
+
+```
+Memory Address -> Student Class
+```
+
+---
+
+# Phase 3 : Initialization
+
+Initialization executes:
+
+- Static variable assignments
+- Static blocks
+
+Example:
+
+```java
+class Demo {
+
+    static int x = 100;
+
+    static {
+
+        System.out.println("Static Block");
+
+    }
+
+}
+```
+
+During Initialization:
+
+```
+x becomes 100
+
+Static block executes.
+```
+
+---
+
+# Static Initialization Order
+
+Example:
+
+```java
+class Demo {
+
+    static int a = 10;
+
+    static {
+
+        System.out.println(a);
+
+    }
+
+}
+```
+
+Execution:
+
+```
+Loading
+
+↓
+
+Linking
+
+↓
+
+Initialization
+
+↓
+
+a = 10
+
+↓
+
+Static Block executes
+```
+
+Output:
+
+```
+10
+```
+
+---
+
+    The Class Loader itself is mainly responsible for the Loading phase. The subsequent Linking and Initialization phases are performed by the JVM as part of the overall class loading process. That's why interviewers often use "class loading" to refer to the complete sequence of Loading → Linking → Initialization.
+
+
+# Class.forName()
+
+Loads and initializes a class.
+
+Example:
+
+```java
+Class.forName("Student");
+```
+
+Effects:
+
+- Loads Student class
+- Executes static variables
+- Executes static blocks
+
+Used in:
+
+- Reflection
+- JDBC (older drivers)
+- Frameworks
+- Dependency Injection
+
+---
+
+# loadClass()
+
+Example:
+
+```java
+ClassLoader loader = ClassLoader.getSystemClassLoader();
+
+loader.loadClass("Student");
+```
+
+    This only loads the class.
+    loadClass() performs Loading and Linking, but it does not initialize the class.
+
+Initialization does **not** happen immediately.
+
+---
+
+# Difference: Class.forName() vs loadClass()
+
+| Class.forName()        | loadClass()                                |
+|------------------------|--------------------------------------------|
+| Loads class            | Loads class                                |
+| Initializes class      | Does not initialize immediately            |
+| Executes static blocks | Static blocks are not executed immediately |
+| Common in Reflection   | Common in custom class loading             |
+
+---
+
+# Can We Create Our Own Class Loader?
+
+Yes.
+
+By extending:
+
+```java
+ClassLoader
+```
+
+Override:
+
+```java
+findClass()
+```
+
+Applications:
+
+- Plugin Systems
+- Application Servers
+- IDEs
+- Bytecode manipulation
+- Frameworks
+
+---
+
+# Important Interview Questions
+
+## Basic
+
+- What is a Class Loader?
+- Why is Class Loader required?
+- Why does Java use Lazy Loading?
+- What is a Class object?
+
+---
+
+## Intermediate
+
+- Types of Class Loaders?
+- Bootstrap vs Platform vs Application?
+- Parent Delegation Model?
+- Why is Parent Delegation important?
+
+---
+
+## Advanced
+
+- Explain the complete Class Loading Process.
+- Verification, Preparation, Resolution?
+- Difference between Loading and Initialization?
+- Difference between `Class.forName()` and `loadClass()`?
+- Can we create our own Class Loader?
+
+---
+
+# Quick Revision
+
+## Class Loader
+
+- Loads `.class` files.
+- Creates `Class` objects.
+- Uses Lazy Loading.
+- Prevents duplicate loading.
+
+---
+
+## Types
+
+- Bootstrap
+- Platform
+- Application
+
+---
+
+## Parent Delegation
+
+Application
+
+↓
+
+Platform
+
+↓
+
+Bootstrap
+
+Bootstrap gets the first chance to load classes.
+
+---
+
+## Class Loading Phases
+
+```
+Loading
+
+↓
+
+Linking
+
+    Verification
+
+    Preparation
+
+    Resolution
+
+↓
+
+Initialization
+```
+
+---
+
+## Linking
+
+Verification
+
+- Validates bytecode.
+
+Preparation
+
+- Allocates memory.
+- Assigns default values to static variables.
+
+Resolution
+
+- Converts symbolic references into actual references.
+
+---
+
+## Initialization
+
+- Assigns actual values to static variables.
+- Executes static blocks.
+
+---
+
+## Class.forName()
+
+- Loads class.
+- Initializes class.
+- Executes static blocks.
+
+---
+
+## loadClass()
+
+- Loads class only.
+- Does not initialize immediately.
+
+---
+
+# Memory Trick
+
+Think of it like this:
+
+- **Loading** → Bring the class into memory.
+- **Linking** → Verify and prepare the class.
+- **Initialization** → Execute static initialization.
+
+**Flow:**
+
+```
+.class File
+      ↓
+Loading
+      ↓
+Verification
+      ↓
+Preparation
+      ↓
+Resolution
+      ↓
+Initialization
+      ↓
+Program Execution
+```
+
+
+How to create one?
+
+Extend the ClassLoader class and override findClass().
+
+Example:
+
+    public class MyClassLoader extends ClassLoader {
+    
+        @Override
+        protected Class<?> findClass(String name)
+                throws ClassNotFoundException {
+    
+            byte[] classData = loadClassBytes(name);
+    
+            return defineClass(name, classData, 0, classData.length);
+        }
+    
+        private byte[] loadClassBytes(String name) {
+    
+            // Read bytes from file/database/network
+    
+            return new byte[0];
+        }
+    }
+
+
+Where is the Class object stored?
+
+    The Class object is stored in the Method Area (called Metaspace in Java 8+).
+
+Flow
+
+        Student.java
+        │
+        ▼
+        javac
+        │
+        ▼
+        Student.class
+        │
+        ▼
+        Class Loader
+        │
+        ▼
+        JVM
+        │
+        ▼
+        Creates Class<Student> object
+        │
+        ▼
+        Stored in Method Area (Metaspace)
+What does the Class object contain?
+
+
+
+    It does not store the actual object instances.
+    
+    class Student {
+    int id;
+    String name;
+    
+        void display() {}
+    }
+
+The Class<Student> object contains metadata like:
+
+    Class Name : Student
+    
+    Fields:
+    id
+    name
+    
+    Methods:
+    display()
+    
+    Constructor:
+    Student()
+    
+    Superclass:
+    Object
+
+
+
+                JVM Memory
+
++------------------------------------+
+|          Metaspace                 |
+|------------------------------------|
+| Class Metadata                     |
+| - Class name                       |
+| - Package name                     |
+| - Superclass                       |
+| - Interfaces                       |
+| - Field definitions                |
+| - Method definitions               |
+| - Constructor definitions          |
+| - Runtime Constant Pool            |
+| - Annotations                      |
+| - Access modifiers                 |
+|------------------------------------|
++------------------------------------+
+
+                ▲
+                │ Associated with
+                ▼
+
++------------------------------------+
+|              Heap                  |
+|------------------------------------|
+| java.lang.Class object             |
+|                                    |
+| Class<Student>                     |
+|                                    |
+| Used by Reflection                 |
+| getMethods()                       |
+| getFields()                        |
+| getName()                          |
+| newInstance()                      |
++------------------------------------+
+
+
+
+What is inside the Class object?
+
+    Think of it as a handle (or wrapper) around the metadata.
+    
+    It contains things like:
+    
+    Reference to the class metadata in Metaspace.
+    APIs used by reflection.
+    Information the JVM needs to represent the class as an object.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+# JVM Execution Engine
+
+## What is the Execution Engine?
+
+The **Execution Engine** is a component of the JVM responsible for executing the Java bytecode that has been loaded into memory.
+
+It takes the bytecode (`.class` files) loaded by the Class Loader and executes it by converting it into native machine code that the CPU understands.
+
+### Responsibilities
+
+- Execute Java bytecode.
+- Convert bytecode into machine code.
+- Improve performance using the Just-In-Time (JIT) Compiler.
+- Work with the Garbage Collector (GC) to manage memory.
+
+---
+
+# Execution Flow
+
+```text
+Java Source (.java)
+        │
+        ▼
+Compiler (javac)
+        │
+        ▼
+Bytecode (.class)
+        │
+        ▼
+Class Loader
+        │
+        ▼
+Execution Engine
+        │
+        ▼
+Machine Code
+        │
+        ▼
+CPU Executes Instructions
+```
+
+---
+
+# Components of the Execution Engine
+
+The Execution Engine mainly consists of:
+
+```text
+Execution Engine
+│
+├── Interpreter
+├── Just-In-Time (JIT) Compiler
+├── Garbage Collector (GC)
+└── Runtime Optimizer
+```
+
+---
+
+# 1. Interpreter
+
+## What is an Interpreter?
+
+The **Interpreter** reads and executes Java bytecode **one instruction at a time**.
+
+It translates each bytecode instruction into machine instructions and executes them immediately.
+
+### Working
+
+```text
+Bytecode
+
+↓
+
+Instruction 1 → Execute
+
+↓
+
+Instruction 2 → Execute
+
+↓
+
+Instruction 3 → Execute
+
+↓
+
+...
+```
+
+### Example
+
+```java
+public class Demo {
+
+    public static void main(String[] args) {
+
+        int a = 10;
+        int b = 20;
+
+        int c = a + b;
+
+        System.out.println(c);
+
+    }
+}
+```
+
+Initially, every bytecode instruction is interpreted one by one.
+
+---
+
+## Advantages
+
+- Starts execution immediately.
+- No need to compile the complete application first.
+- Faster startup time.
+
+---
+
+## Disadvantages
+
+Suppose a method executes one million times.
+
+```java
+for(int i = 0; i < 1000000; i++) {
+
+    add();
+
+}
+```
+
+The Interpreter executes the same bytecode one million times.
+
+This makes execution slower.
+
+---
+
+# 2. Just-In-Time (JIT) Compiler
+
+## What is JIT?
+
+The **Just-In-Time Compiler (JIT)** improves performance by converting **frequently executed bytecode into native machine code**.
+
+Instead of interpreting the same bytecode repeatedly, the compiled machine code is reused.
+
+---
+
+# Why is JIT Needed?
+
+Without JIT:
+
+```text
+Bytecode
+
+↓
+
+Interpreter
+
+↓
+
+Executed Again
+
+↓
+
+Interpreter
+
+↓
+
+Executed Again
+
+↓
+
+Interpreter
+```
+
+Every execution requires interpretation.
+
+With JIT:
+
+```text
+Bytecode
+
+↓
+
+Interpreter
+
+↓
+
+Frequently Executed
+
+↓
+
+JIT Compiler
+
+↓
+
+Machine Code
+
+↓
+
+Future Executions Use Machine Code Directly
+```
+
+This greatly improves performance.
+
+---
+
+# Hot Methods
+
+The JVM monitors method execution.
+
+Methods that execute very frequently are called **Hot Methods**.
+
+Example:
+
+```java
+public int add(int a, int b) {
+
+    return a + b;
+
+}
+```
+
+If this method is called thousands of times,
+
+the JVM marks it as **Hot**.
+
+The JIT Compiler then compiles it into native machine code.
+
+---
+
+# JIT Execution Flow
+
+```text
+Method Call
+
+↓
+
+Interpreter Executes
+
+↓
+
+Execution Count Increases
+
+↓
+
+Method Becomes Hot
+
+↓
+
+JIT Compiler Compiles It
+
+↓
+
+Machine Code Stored
+
+↓
+
+Future Calls Execute Machine Code
+```
+
+---
+
+# Advantages of JIT
+
+- Faster execution.
+- Eliminates repeated interpretation.
+- Performs runtime optimizations.
+- Improves application performance significantly.
+
+---
+
+# JIT Optimizations
+
+The JIT Compiler performs several optimizations.
+
+Examples include:
+
+- Method Inlining
+- Dead Code Elimination
+- Loop Optimization
+- Constant Folding
+- Escape Analysis
+
+You are **not expected to know the implementation details** for most backend interviews.
+
+Simply knowing that **JIT optimizes hot code** is sufficient.
+
+---
+
+# Interpreter vs JIT Compiler
+
+| Interpreter                                   | JIT Compiler                                             |
+|-----------------------------------------------|----------------------------------------------------------|
+| Executes bytecode instruction by instruction. | Converts frequently executed bytecode into machine code. |
+| Faster startup.                               | Faster long-term execution.                              |
+| Slower for repeated execution.                | Very fast after compilation.                             |
+| No optimization.                              | Performs many runtime optimizations.                     |
+
+---
+
+# Why Does Java Use Both?
+
+If Java used **only the Interpreter**:
+
+- Fast startup.
+- Slow execution.
+
+If Java used **only the Compiler**:
+
+- Slow startup because everything must be compiled first.
+
+Java combines both approaches.
+
+Execution Flow:
+
+```text
+Program Starts
+
+↓
+
+Interpreter Executes Bytecode
+
+↓
+
+JVM Detects Frequently Executed Methods
+
+↓
+
+JIT Compiles Hot Methods
+
+↓
+
+Future Calls Execute Machine Code
+```
+
+This provides:
+
+- Fast startup.
+- High runtime performance.
+
+---
+
+# 3. Garbage Collector (GC)
+
+The Execution Engine also works with the **Garbage Collector**.
+
+The Garbage Collector automatically removes objects that are no longer reachable.
+
+Example:
+
+```java
+Student s = new Student();
+
+s = null;
+```
+
+The `Student` object becomes **eligible for garbage collection** because no live reference points to it.
+
+The Garbage Collector reclaims its memory automatically.
+
+---
+
+# HotSpot JVM
+
+The most commonly used JVM implementation is **HotSpot JVM**.
+
+Its responsibilities include:
+
+- Detect frequently executed methods.
+- Send hot methods to the JIT Compiler.
+- Perform runtime optimizations.
+- Improve application performance.
+
+---
+
+# Complete Execution Flow
+
+```text
+Java Source (.java)
+
+        │
+
+        ▼
+
+Compiler (javac)
+
+        │
+
+        ▼
+
+Bytecode (.class)
+
+        │
+
+        ▼
+
+Class Loader
+
+        │
+
+        ▼
+
+Execution Engine
+
+        │
+
+        ├──────────────► Interpreter
+
+        │
+
+        ├──────────────► JIT Compiler
+
+        │
+
+        └──────────────► Garbage Collector
+
+        │
+
+        ▼
+
+Machine Code
+
+        │
+
+        ▼
+
+CPU
+```
+
+---
+
+# Interview Questions
+
+## Basic
+
+- What is the Execution Engine?
+- What are its responsibilities?
+- What are the components of the Execution Engine?
+- What is an Interpreter?
+- What is a JIT Compiler?
+
+---
+
+## Intermediate
+
+- Why do we need both the Interpreter and JIT Compiler?
+- What is a Hot Method?
+- How does JIT improve performance?
+- What is the role of the Garbage Collector?
+
+---
+
+## Advanced
+
+- What is the HotSpot JVM?
+- Name some JIT optimizations.
+- How does the JVM decide when to compile a method?
+
+---
+
+# Quick Revision
+
+## Execution Engine
+
+- Executes bytecode.
+- Converts bytecode into machine code.
+- Optimizes execution.
+- Works with the Garbage Collector.
+
+---
+
+## Components
+
+- Interpreter
+- JIT Compiler
+- Garbage Collector
+- Runtime Optimizer
+
+---
+
+## Interpreter
+
+- Executes bytecode line by line.
+- Faster startup.
+- Slower for repeated execution.
+
+---
+
+## JIT Compiler
+
+- Compiles hot methods into machine code.
+- Improves runtime performance.
+- Performs runtime optimizations.
+
+---
+
+## Garbage Collector
+
+- Removes unreachable objects.
+- Frees heap memory automatically.
+
+---
+
+## HotSpot JVM
+
+- Detects hot methods.
+- Invokes the JIT Compiler.
+- Optimizes execution.
+
+---
+
+# Memory Trick
+
+Remember the execution sequence as:
+
+```text
+Bytecode
+
+↓
+
+Interpreter
+
+↓
+
+Hot Method
+
+↓
+
+JIT Compiler
+
+↓
+
+Machine Code
+
+↓
+
+CPU Execution
+```
+
+**Easy way to remember:**
+
+- **Interpreter** → Starts the program quickly.
+- **JIT Compiler** → Makes frequently executed code run faster.
+- **Garbage Collector** → Cleans up unused memory.
+
+
+How does the HotSpot JVM know which methods are "hot"?
+
+The HotSpot JVM keeps execution counters for methods and loops.
+
+Every time a method is executed, its counter increases.
+
+Example:
+
+public class Demo {
+
+    public static void add() {
+        System.out.println("Hello");
+    }
+
+    public static void main(String[] args) {
+
+        for (int i = 0; i < 100000; i++) {
+            add();
+        }
+    }
+}
+
+Initially:
+
+add() called
+
+Counter = 1
+
+↓
+
+Counter = 2
+
+↓
+
+Counter = 3
+
+↓
+
+...
+
+↓
+
+Counter = 10000
+
+When the counter crosses a JVM-defined threshold, HotSpot marks it as a Hot Method
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Advanced JVM Topics for Java Backend Interviews
+
+These topics are commonly asked in **product-based company interviews (2–8 years)**. They help you understand **how HotSpot JVM achieves high performance**.
+
+---
+
+# 1. JVM Startup Options (JVM Arguments)
+
+JVM behavior can be customized using command-line options.
+
+Example:
+
+```bash
+java -Xms512m -Xmx2g MyApplication
+```
+
+These options control memory, garbage collection, debugging, and performance.
+
+---
+
+## 1.1 -Xms (Initial Heap Size)
+
+Specifies the **initial heap size** allocated when the JVM starts.
+
+Example:
+
+```bash
+java -Xms512m MyApp
+```
+
+Meaning:
+
+- JVM immediately allocates **512 MB** heap.
+- Heap will not start with a smaller size.
+
+### Why use it?
+
+If your application is large, repeatedly expanding the heap is expensive.
+
+Using a larger initial heap reduces heap expansion.
+
+---
+
+## 1.2 -Xmx (Maximum Heap Size)
+
+Specifies the maximum heap memory JVM may use.
+
+Example:
+
+```bash
+java -Xmx2g MyApp
+```
+
+Meaning:
+
+Maximum heap = 2 GB
+
+If heap exceeds this:
+
+```
+java.lang.OutOfMemoryError: Java heap space
+```
+
+---
+
+## 1.3 -Xss (Thread Stack Size)
+
+Specifies stack size for **each thread**.
+
+Example:
+
+```bash
+java -Xss1m
+```
+
+Meaning:
+
+Every thread gets 1 MB stack.
+
+If recursion is very deep:
+
+```
+StackOverflowError
+```
+
+Increasing Xss allows deeper recursion.
+
+But:
+
+Larger stack → fewer threads can be created.
+
+---
+
+## 1.4 -XX:MaxMetaspaceSize
+
+Limits Metaspace size.
+
+Example:
+
+```bash
+-XX:MaxMetaspaceSize=512m
+```
+
+If many classes are loaded:
+
+```
+OutOfMemoryError: Metaspace
+```
+
+Useful in application servers where many class loaders exist.
+
+---
+
+## 1.5 -XX:+UseG1GC
+
+Chooses G1 Garbage Collector.
+
+```bash
+java -XX:+UseG1GC
+```
+
+G1:
+
+- Low pause times
+- Region-based heap
+- Default GC since Java 9
+
+Suitable for:
+
+- Spring Boot
+- Large backend systems
+- Web servers
+
+---
+
+## 1.6 -XX:+HeapDumpOnOutOfMemoryError
+
+Automatically generates heap dump.
+
+Example:
+
+```bash
+java -XX:+HeapDumpOnOutOfMemoryError
+```
+
+When OOM occurs:
+
+```
+java_pid12345.hprof
+```
+
+is generated.
+
+Developers analyze it using:
+
+- Eclipse MAT
+- VisualVM
+- JProfiler
+
+Useful for detecting memory leaks.
+
+---
+
+# 2. Escape Analysis
+
+One of the biggest JVM optimizations.
+
+Question:
+
+**Does this object escape the method?**
+
+If NOT,
+
+JVM performs several optimizations.
+
+---
+
+Example:
+
+```java
+public int sum() {
+    Point p = new Point(2,3);
+    return p.x + p.y;
+}
+```
+
+Does `p` escape?
+
+No.
+
+Nobody outside this method can access it.
+
+Therefore JVM optimizes it.
+
+---
+
+Escape analysis enables:
+
+- Stack Allocation
+- Lock Elimination
+- Scalar Replacement
+
+---
+
+# 2.1 Stack Allocation
+
+Normally:
+
+```
+new Object()
+↓
+
+Heap
+```
+
+But if object never escapes:
+
+JVM may allocate it on stack.
+
+```
+Method Stack
+
+Point p
+```
+
+Advantages:
+
+- No GC required
+- Faster allocation
+- Automatic cleanup
+
+Interview point:
+
+Not guaranteed.
+
+HotSpot decides.
+
+---
+
+# 2.2 Lock Elimination
+
+Suppose:
+
+```java
+public void test() {
+
+    Object lock = new Object();
+
+    synchronized(lock){
+        System.out.println("Hello");
+    }
+
+}
+```
+
+Normally synchronized requires locking.
+
+But:
+
+No other thread can access this lock.
+
+So JVM removes synchronization completely.
+
+Benefits:
+
+- Less locking overhead
+- Better performance
+
+---
+
+# 2.3 Scalar Replacement
+
+Suppose:
+
+```java
+Point p = new Point(10,20);
+```
+
+Instead of creating object:
+
+```
+Heap
+
+Point
+ x
+ y
+```
+
+JVM converts it into:
+
+```
+int x = 10;
+int y = 20;
+```
+
+No object exists.
+
+Benefits:
+
+- No heap allocation
+- No GC
+- Faster execution
+
+---
+
+# 3. TLAB (Thread Local Allocation Buffer)
+
+One of the most important JVM optimizations.
+
+Question:
+
+How can thousands of threads create objects simultaneously without locking the heap?
+
+Answer:
+
+Each thread gets its own small allocation area inside Eden.
+
+Called
+
+```
+Thread Local Allocation Buffer
+```
+
+Example:
+
+```
+Young Generation (Eden)
+
+------------------------------------------------
+
+TLAB Thread 1
+
+TLAB Thread 2
+
+TLAB Thread 3
+
+TLAB Thread 4
+
+------------------------------------------------
+```
+
+When thread creates object:
+
+```
+new User()
+```
+
+Object goes into its own TLAB.
+
+No synchronization required.
+
+Hence allocation is extremely fast.
+
+When TLAB becomes full:
+
+Thread requests another TLAB.
+
+Large objects bypass TLAB and are allocated directly in Eden.
+
+---
+
+## Why object allocation is so fast?
+
+Reasons:
+
+1. Allocation usually happens inside TLAB.
+2. Only pointer increment required.
+
+Example:
+
+```
+Current Pointer
+
+↓
+
++-------------------------------+
+
+Free Space
+
++-------------------------------+
+```
+
+Creating object:
+
+```
+Pointer += Object Size
+```
+
+No searching.
+
+No linked list.
+
+No lock.
+
+Almost as fast as stack allocation.
+
+---
+
+# 4. Safepoints
+
+Safepoint = a moment where JVM knows every thread is in a safe state.
+
+Needed before:
+
+- Garbage Collection
+- Class Redefinition
+- Thread dump
+- Deoptimization
+
+Question:
+
+Why stop threads?
+
+Imagine:
+
+GC moving objects.
+
+Meanwhile another thread:
+
+```
+user.address.city
+```
+
+If GC moves object simultaneously:
+
+Thread could read invalid memory.
+
+Therefore:
+
+JVM pauses threads.
+
+Runs GC.
+
+Updates references.
+
+Resumes execution.
+
+---
+
+### Where do safepoints occur?
+
+Typically:
+
+- Method entry
+- Method exit
+- Loop back edges
+- Exception handling
+
+JIT inserts safepoint polls into compiled code.
+
+---
+
+# 5. Minor GC vs Major GC vs Full GC
+
+## Minor GC
+
+Operates on:
+
+```
+Young Generation
+
+Eden
+
+S0
+
+S1
+```
+
+Triggered when Eden fills.
+
+Objects surviving several Minor GCs may be promoted to the Old Generation.
+
+Characteristics:
+
+- Frequent
+- Fast
+- Short pause
+
+---
+
+## Major GC
+
+Targets:
+
+```
+Old Generation
+```
+
+Triggered when old generation fills.
+
+Characteristics:
+
+- Less frequent
+- Longer pause
+- More expensive
+
+(Some collectors use different terminology, and "Major GC" is not always a distinct event.)
+
+---
+
+## Full GC
+
+Collects:
+
+```
+Entire Heap
+
+Young
+
+Old
+```
+
+Additionally:
+
+May unload unused classes and reclaim Metaspace depending on the garbage collector and JVM implementation.
+
+Characteristics:
+
+- Slowest GC
+- Long pause
+- Avoid in production if frequent
+
+---
+
+## Comparison
+
+| Feature | Minor GC | Major GC | Full GC |
+|----------|----------|----------|----------|
+| Young Generation | ✅ | ❌ | ✅ |
+| Old Generation | ❌ | ✅ | ✅ |
+| Metaspace/Class Unloading | ❌ | Collector-dependent | Often Yes |
+| Speed | Fast | Medium | Slow |
+| Frequency | High | Low | Very Low |
+
+---
+
+# 6. Common JVM Errors
+
+## 6.1 OutOfMemoryError: Java heap space
+
+Reason:
+
+Heap exhausted.
+
+Example:
+
+```java
+List<byte[]> list = new ArrayList<>();
+
+while(true)
+    list.add(new byte[1024*1024]);
+```
+
+Result:
+
+```
+OutOfMemoryError:
+Java heap space
+```
+
+Solutions:
+
+- Increase Xmx
+- Fix memory leak
+- Optimize object usage
+
+---
+
+## 6.2 OutOfMemoryError: Metaspace
+
+Reason:
+
+Too many classes loaded.
+
+Common in:
+
+- Tomcat
+- Spring Boot DevTools
+- Dynamic proxies
+- Class loader leaks
+
+Solution:
+
+Increase:
+
+```
+-XX:MaxMetaspaceSize
+```
+
+or fix class-loader leaks.
+
+---
+
+## 6.3 StackOverflowError
+
+Reason:
+
+Infinite recursion.
+
+Example:
+
+```java
+void fun(){
+    fun();
+}
+```
+
+Every recursive call creates another stack frame until the thread's stack is exhausted.
+
+Solutions:
+
+- Fix recursion
+- Increase Xss (only if appropriate)
+
+---
+
+## 6.4 GC Overhead Limit Exceeded
+
+Meaning:
+
+JVM spends almost all its time performing GC but recovers very little memory.
+
+Typical cause:
+
+Memory leak or extremely undersized heap.
+
+Symptoms:
+
+- High CPU usage
+- Frequent Full GCs
+- Application barely progresses
+
+Solutions:
+
+- Fix leaks
+- Increase heap
+- Analyze heap dump
+
+---
+
+# 7. JIT Compilation Levels
+
+HotSpot JVM uses two JIT compilers.
+
+---
+
+## C1 Compiler (Client Compiler)
+
+Goal:
+
+Fast compilation.
+
+Characteristics:
+
+- Compiles quickly
+- Lower optimization
+- Faster startup
+- Good for short-lived applications
+
+---
+
+## C2 Compiler (Server Compiler)
+
+Goal:
+
+Maximum runtime performance.
+
+Characteristics:
+
+- More aggressive optimizations
+- Longer compilation time
+- Produces highly optimized native code
+- Best for long-running server applications
+
+Optimizations include:
+
+- Inlining
+- Loop unrolling
+- Escape analysis
+- Dead code elimination
+- Vectorization (where applicable)
+
+---
+
+## Tiered Compilation
+
+Modern HotSpot combines the interpreter, C1, and C2.
+
+Execution flow:
+
+```
+Bytecode
+      │
+      ▼
+Interpreter
+      │
+      ▼
+Frequently Executed?
+      │
+      ▼
+Compile using C1
+      │
+      ▼
+Collect Profiling Information
+      │
+      ▼
+Very Hot?
+      │
+      ▼
+Compile again using C2
+      │
+      ▼
+Highly Optimized Native Code
+```
+
+Benefits:
+
+- Fast application startup (thanks to the interpreter and C1)
+- Excellent long-term performance (thanks to C2)
+- Runtime profiling ensures expensive optimizations are applied only to genuinely hot code
+
+---
+
+# Interview Summary
+
+| Topic | Key Point |
+|--------|-----------|
+| `-Xms` | Initial heap size |
+| `-Xmx` | Maximum heap size |
+| `-Xss` | Thread stack size |
+| `MaxMetaspaceSize` | Limit Metaspace |
+| `UseG1GC` | Enable G1 Garbage Collector |
+| `HeapDumpOnOutOfMemoryError` | Generate heap dump on OOM |
+| Escape Analysis | Determines if an object escapes its scope |
+| Stack Allocation | Non-escaping objects may be allocated on the stack |
+| Lock Elimination | Removes unnecessary synchronization |
+| Scalar Replacement | Replaces objects with primitive fields when possible |
+| TLAB | Per-thread allocation buffer for fast object creation |
+| Safepoint | Safe point where JVM can pause threads for VM operations |
+| Minor GC | Collects the Young Generation |
+| Major GC | Primarily collects the Old Generation |
+| Full GC | Collects the whole heap and may unload classes |
+| Heap OOM | Heap memory exhausted |
+| Metaspace OOM | Class metadata memory exhausted |
+| StackOverflowError | Thread stack exhausted due to deep recursion |
+| GC Overhead Limit | JVM spends too much time in GC with little memory reclaimed |
+| C1 | Fast compilation with modest optimizations |
+| C2 | Slower compilation with aggressive optimizations |
+| Tiered Compilation | Interpreter → C1 → C2 optimization pipeline |
