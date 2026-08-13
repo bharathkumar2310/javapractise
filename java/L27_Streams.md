@@ -1571,3 +1571,112 @@ return l;
 ));
 
 First it collects into a list, then sorts that list.
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+# Java Collectors Handbook
+
+## Table of Contents
+
+1.  toList()
+2.  toSet()
+3.  toMap()
+4.  joining()
+5.  counting()
+6.  summingInt()
+7.  averagingInt()
+8.  maxBy()
+9.  minBy()
+10. groupingBy()
+11. partitioningBy()
+12. mapping()
+13. collectingAndThen()
+
+> This handbook will explain **every overload**, parameter, examples,
+> interview questions, common mistakes, and complexity.
+>
+> **Version 1:** We start with `toList()` and expand each remaining
+> collector in subsequent sections.
+
+# 1. Collectors.toList()
+
+## Purpose
+
+Collects stream elements into a `List`.
+
+## Overloads
+
+``` java
+public static <T> Collector<T, ?, List<T>> toList()
+```
+
+Only **one overload**.
+
+## Parameters
+
+None.
+
+``` java
+stream.collect(Collectors.toList());
+```
+
+## Example
+
+``` java
+List<String> names = employees.stream()
+    .map(Employee::getName)
+    .collect(Collectors.toList());
+```
+
+## Output
+
+``` text
+[John, Alex, Bob]
+```
+
+## Interview Questions
+
+### Q1. Difference between `Stream.toList()` and `Collectors.toList()`?
+
+Stream.toList()     Collectors.toList()
+  ------------------- -----------------------------------
+Java 16+            Java 8+
+Unmodifiable list   Mutability not guaranteed by spec
+Short syntax        Uses collect()
+
+### Common Mistakes
+
+-   Doesn't remove duplicates.
+-   Doesn't sort.
+-   Doesn't modify original collection.
+
+## Complexity
+
+-   Time: O(n)
+-   Space: O(n)
+
+------------------------------------------------------------------------
+
+## Upcoming Sections
+
+Each of the following will include: - Purpose - Every overload -
+Parameter explanation - Simple examples - Real interview examples -
+Common mistakes - Time complexity - Interview questions
+
+-   toSet()
+-   toMap() (all overloads)
+-   joining()
+-   counting()
+-   summingInt()
+-   averagingInt()
+-   maxBy()
+-   minBy()
+-   groupingBy() (all overloads)
+-   partitioningBy()
+-   mapping()
+-   collectingAndThen()

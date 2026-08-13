@@ -68,6 +68,138 @@ Generics are mainly used for:
     You know exactly what type of object is expected in collections or methods.
 
 
+
+
+Example 1: Basic Generic Class
+    
+    class Box<T> {
+    private T value;
+    
+        // Constructor
+        public Box(T value) {
+            this.value = value;
+        }
+    
+        public T getValue() {
+            return value;
+        }
+    }
+
+Usage:
+
+    Box<Integer> b1 = new Box<>(10);
+    Box<String> b2 = new Box<>("Hello");
+    
+    System.out.println(b1.getValue()); // 10
+    System.out.println(b2.getValue()); // Hello
+Example 2: Multiple Generic Types
+    
+    class Pair<K, V> {
+    private K key;
+    private V value;
+    
+        public Pair(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+    
+        public K getKey() {
+            return key;
+        }
+    
+        public V getValue() {
+            return value;
+        }
+    }
+
+Usage:
+
+    Pair<Integer, String> p = new Pair<>(1, "Java");
+    
+    System.out.println(p.getKey());   // 1
+    System.out.println(p.getValue()); // Java
+Example 3: Generic Constructor (Different from Generic Class)
+
+A constructor itself can also be generic, even if the class is not.
+
+    class Demo {
+    
+        public <T> Demo(T value) {
+            System.out.println(value);
+        }
+    }
+
+Usage:
+
+    new Demo(10);
+    new Demo("Hello");
+    new Demo(3.14);
+
+Here, the class is not generic, only the constructor is.
+
+Example 4: Generic Class with a Generic Constructor
+    
+    class Box<T> {
+    private T value;
+    
+        public Box(T value) {
+            this.value = value;
+        }
+    
+        public <U> void print(U other) {
+            System.out.println(value + " " + other);
+        }
+    }
+
+Usage:
+
+    Box<Integer> box = new Box<>(100);
+    box.print("Java");   // 100 Java
+    box.print(true);     // 100 true
+
+Notice:
+
+    T belongs to the class.
+    U belongs only to the method (print).
+    Common Mistake
+
+❌ Incorrect:
+
+    class Box<T> {
+    
+        // Wrong
+        public <T> Box(T value) {
+        }
+    }
+
+Here, the constructor declares a new T, hiding the class's T.
+
+✔ Correct:
+
+    class Box<T> {
+    
+        public Box(T value) {
+        }
+    }
+
+Only declare <T> before the constructor if you intentionally want a different generic type parameter for the constructor itself.
+
+Rule to Remember
+
+Generic class constructor: use the class's type parameter directly.
+
+    class Box<T> {
+    public Box(T value) { }
+    }
+
+Generic constructor: declare its own type parameter.
+
+    class Demo {
+    public <T> Demo(T value) { }
+    }
+
+Most of the time, when working with generic classes like ArrayList<E>, HashMap<K,V>, or your own generic classes, you'll use the first form.
+
 ![img.png](../Images/gen1.png)
 
 ![img_1.png](../Images/gen2.png)
@@ -359,6 +491,26 @@ A **wildcard** is represented by the **question mark `?`** in Java generics.
 | `<? extends T>` | Upper bounded — any type that is `T` or a subclass of `T`   |
 | `<? super T>`   | Lower bounded — any type that is `T` or a superclass of `T` |
 
+
+Example : 
+
+
+    List<Number> dest = new ArrayList<>();
+    
+    This works:
+    
+    Collections.copy(dest, src);
+    
+    Here:
+    
+    T = Integer
+    
+    src  -> List<? extends Integer>  (List<Integer>)
+    dest -> List<? super Integer>    (List<Number>)
+
+Without wildcards, you cannot express:
+
+"Destination can be any supertype of T."
 
 ----------------------------------------------------------------------------------------
 

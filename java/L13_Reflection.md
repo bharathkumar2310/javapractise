@@ -7,6 +7,14 @@
 Whenever a class is loaded , for each class it creates a class object which contains metadata about the class like what fields, methods, contsructors it has
 what is the acceess modifier and every information about class
 
+Metaspace stores the JVM's internal metadata about a class.
+The Class object is a Java object on the heap that represents that class and provides methods (such as getName(), getMethods(), getFields()) to access that metadata through reflection.
+
+So when people say:
+
+"The Class object acts as the runtime representation of a class,"
+
+they mean that your Java code interacts with the Class object, while the Class object communicates with the JVM's internal class metadata stored in Metaspace.
 
 ![img.png](../Images/reflection1.png)
 

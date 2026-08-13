@@ -1241,3 +1241,198 @@ Replace reference
 
 
 
+You're asking:
+
+If two threads operating on different buckets both notice that the threshold has been exceeded, will both try to resize the ConcurrentHashMap?
+
+The answer is:
+
+No. Only one thread initiates the resize. Other threads detect that resizing is already in progress and help complete it instead of starting another resize.
+
+This is one of the clever parts of Java 8's ConcurrentHashMap.
+
+Example
+
+Suppose:
+
+Capacity = 16
+
+Load Factor = 0.75
+
+Threshold = 12
+
+Current size:
+
+11
+Two threads insert simultaneously
+
+Thread 1
+
+put(K1, V1);
+
+goes to Bucket 2.
+
+Thread 2
+
+put(K2, V2);
+
+goes to Bucket 10.
+
+After both insertions:
+
+Size = 13
+
+Threshold:
+
+12
+
+Both threads realize:
+
+Size > Threshold
+
+Should both create a new table?
+
+No.
+
+What actually happens?
+
+One thread wins the race to start resizing.
+
+Conceptually:
+
+Thread 1
+
+↓
+
+Starts resize
+
+↓
+
+Creates new table (capacity 32)
+
+↓
+
+Begins transferring buckets
+
+Thread 2 reaches the resize check slightly later.
+
+It notices:
+
+Resize already in progress
+
+So it does not allocate another table.
+
+Instead, it helps move buckets from the old table to the new table.
+
+Cooperative Resizing
+
+Instead of:
+
+Thread 1
+
+Resize
+
+Thread 2
+
+Wait
+
+Java does:
+
+Thread 1
+
+Move Bucket 0
+Move Bucket 1
+Move Bucket 2
+
+--------------------
+
+Thread 2
+
+Move Bucket 8
+Move Bucket 9
+Move Bucket 10
+
+Both threads participate in the resize.
+
+This is called cooperative resizing.
+
+How does Thread 2 know?
+
+Internally, ConcurrentHashMap uses a special control variable called sizeCtl and special marker nodes called ForwardingNode.
+
+Very simplified:
+
+Thread 1
+
+↓
+
+Sets sizeCtl to indicate:
+
+"Resize in progress"
+
+Thread 2 checks sizeCtl.
+
+Instead of starting another resize, it sees:
+
+Resize already happening
+
+and joins the transfer work.
+
+ForwardingNode
+
+As buckets are moved:
+
+Old Bucket 5
+
+↓
+
+ForwardingNode
+
+If another thread accesses Bucket 5 and sees a ForwardingNode, it knows:
+
+This bucket has already been moved.
+Use the new table (or help with the transfer).
+Visual
+Old Table (16)
+
+Bucket 0  → moved ✔
+Bucket 1  → moved ✔
+Bucket 2  → Thread 1 moving
+Bucket 3
+Bucket 4
+Bucket 5
+Bucket 6
+Bucket 7
+
+Bucket 8  → Thread 2 moving
+Bucket 9
+Bucket 10
+...
+
+Both threads help finish the resize faster.
+
+Why not let both resize independently?
+
+Imagine:
+
+Thread 1
+
+Creates Table A (capacity 32)
+
+--------------------
+
+Thread 2
+
+Creates Table B (capacity 32)
+
+Now:
+
+Which table is the correct one?
+Which entries go where?
+How do you merge them?
+
+It would waste memory and create consistency problems.
+
+So Java ensures there is only one new table, and all threads cooperate to populate it.
+
+SizeCtl is an atomic variable
